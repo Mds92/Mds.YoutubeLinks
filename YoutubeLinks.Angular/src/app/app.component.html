@@ -1,0 +1,49 @@
+<md-card>
+  <md-card-header class="bg-gray">
+    <md-card-title>
+      <h1> {{title}} </h1>
+    </md-card-title>
+    <md-card-subtitle>By Mohammad Dayyan</md-card-subtitle>
+  </md-card-header>
+  <md-card-content>
+    <table class="full-width">
+      <tr>
+        <td>
+          <md-input-container class="full-width">
+            <input mdInput type="text" placeholder="YouTube video url" [(ngModel)]="youtubeUrl" [disabled]="inProcess" />
+          </md-input-container>
+        </td>
+        <td>
+          <button md-raised-button (click)="getLinksButtonOnClick()" [disabled]="inProcess">Get links</button>
+        </td>
+      </tr>
+    </table>
+    <hr *ngIf="youtubeLinks.length > 0 || errorMessage != ''" />
+    <table class="table" *ngIf="!inProcess && youtubeLinks.length > 0">
+      <thead>
+        <tr>
+          <td>#</td>
+          <td>Quality</td>
+          <td>Type</td>
+          <td>Download</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of youtubeLinks; let myIndex = index">
+          <td>{{ myIndex + 1 }}</td>
+          <td>{{ item.quality }}</td>
+          <td>{{ item.type }}</td>
+          <td>
+            <a md-mini-fab [href]="item.downloadUrl">
+              <md-icon>file_download</md-icon>
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="spinner">
+      <md-spinner *ngIf="inProcess"></md-spinner>
+    </div>
+    <div class="text-danger" *ngIf="errorMessage != ''" [innerHTML]="errorMessage"></div>
+  </md-card-content>
+</md-card>

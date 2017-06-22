@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "YoutubeLinks.Angular", "YoutubeLinks.Angular\YoutubeLinks.Angular.njsproj", "{BA1A2B51-2085-4879-B602-1FB917DAF0D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoutubeLinks.Api", "YoutubeLinks.Api\YoutubeLinks.Api.csproj", "{038C2685-AF68-4728-978E-7E72BF58CF88}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA1A2B51-2085-4879-B602-1FB917DAF0D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA1A2B51-2085-4879-B602-1FB917DAF0D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA1A2B51-2085-4879-B602-1FB917DAF0D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA1A2B51-2085-4879-B602-1FB917DAF0D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{038C2685-AF68-4728-978E-7E72BF58CF88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{038C2685-AF68-4728-978E-7E72BF58CF88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{038C2685-AF68-4728-978E-7E72BF58CF88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{038C2685-AF68-4728-978E-7E72BF58CF88}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
