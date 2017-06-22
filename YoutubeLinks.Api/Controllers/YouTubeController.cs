@@ -9,7 +9,9 @@ using OpenQA.Selenium.Chrome;
 using YoutubeLinks.Api.Models;
 using YoutubeLinks.Api.Filters;
 using System.Collections.Generic;
+using System.Diagnostics;
 using OpenQA.Selenium.Support.UI;
+using ZetaLongPaths;
 
 namespace YoutubeLinks.Api.Controllers
 {
@@ -17,7 +19,7 @@ namespace YoutubeLinks.Api.Controllers
     public class YouTubeController : BaseController
     {
         [HttpPost]
-        public List<YoutubeVideoModel> GetLinks(YoutubeGetLinksModel model)
+        public YoutubeVideoPageModel GetLinks(YoutubeGetLinksModel model)
         {
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
@@ -29,7 +31,7 @@ namespace YoutubeLinks.Api.Controllers
             //        ITag = "22",
             //        Title = "Test1",
             //        Quality = "Mp4",
-            //        Type = "Video",
+            //        Type = "Video/mp4;+codecs=\"avc1.64001F,+mp4a.40.2\"",
             //        DownloadUrl = ""
             //    },
             //    new YoutubeVideoModel
@@ -37,7 +39,7 @@ namespace YoutubeLinks.Api.Controllers
             //        ITag = "33",
             //        Title = "Test2",
             //        Quality = "Mp4",
-            //        Type = "Video",
+            //        Type = "Video/webm;+codecs=\"vp8.0,+vorbis\"",
             //        DownloadUrl = ""
             //    },
             //    new YoutubeVideoModel
@@ -57,7 +59,7 @@ namespace YoutubeLinks.Api.Controllers
             var chromeOptions = new ChromeOptions();
             chromeOptions.AddArgument("--log-level=3");
 
-            var videos = new List<YoutubeVideoModel>();
+            var youtubeVideoPageModel = new YoutubeVideoPageModel();
             Exception exception = null;
 
             using (var chromeDriver = new ChromeDriver(chromeDriverService, chromeOptions))
@@ -76,9 +78,11 @@ namespace YoutubeLinks.Api.Controllers
                             .reduce((prev, curr) => (curr = curr.split('='),
                                 Object.assign(prev, {[curr[0]]: decodeURIComponent(curr[1])})
                             ), {}))");
+                    var pageTitle = (string)js.ExecuteScript(@"return document.title");
                     var videosObjectJson = JsonConvert.SerializeObject(videosObjectList);
                     var internalVideos = JsonConvert.DeserializeObject<List<YoutubeVideoInternalModel>>(videosObjectJson);
-                    videos.AddRange(internalVideos.Select(youtubeVideoInternalModel => new YoutubeVideoModel
+                    youtubeVideoPageModel.PageTitle = pageTitle.Replace("- YouTube", "").Trim();
+                    youtubeVideoPageModel.Links.AddRange(internalVideos.Select(youtubeVideoInternalModel => new YoutubeLinkModel
                     {
                         ITag = youtubeVideoInternalModel.itag,
                         DownloadUrl = youtubeVideoInternalModel.url.ToBase64(),
@@ -92,18 +96,26 @@ namespace YoutubeLinks.Api.Controllers
                     exception = ex;
                 }
             }
-            if(exception != null) throw exception;
-            return videos;
+            if (exception != null) throw exception;
+            return youtubeVideoPageModel;
         }
 
         [HttpPost]
-        public string DownloadLink(string url)
+        public string GetDownloadLink(YoutubeDownloadModel model)
         {
-            if (string.IsNullOrWhiteSpace(url))
+            if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
-            var plainUrl = url.Base64ToPlainText();
 
-            return "";
+            var downloadUrl = model.Url.Base64ToPlainText();
+            var type = model.Type;
+            var destinationDirectory = ZlpPathHelper.Combine(HttpRuntime.AppDomainAppPath, "DownloadTemp");
+
+            // Video/mp4;+codecs="avc1.64001F,+mp4a.40.2"
+            var extension = type.Substring(0, type.IndexOf(";", StringComparison.InvariantCultureIgnoreCase));
+            extension = extension.Remove(0, extension.IndexOf("/", StringComparison.InvariantCultureIgnoreCase) + 1);
+            var fullFileName = ZlpPathHelper.Combine(destinationDirectory, $"{model.PageTitle}_{Guid.NewGuid()}.{extension}".RemoveIllegalCharsForUrl());
+            //Aria2Downloader.DownloadFile(downloadUrl, fullFileName, "http://127.0.0.1:54076/", 0, message => { Trace.WriteLine(message); });
+            return fullFileName.Remove(0, fullFileName.IndexOf("DownloadTemp", StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

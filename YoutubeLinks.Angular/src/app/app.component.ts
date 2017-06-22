@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { YoutubeLinksModel } from './youtube-links-model';
-import { Http, Jsonp, Response, Headers, RequestOptions } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/map';
+import { YoutubeLinkModel, YoutubePageModel, YoutubeDownloadModel } from './youtube-links-model';
+import { YoutubeLinksService } from './youtube-links.service';
+import { WindowService } from './window.service';
+import { MdRadioButton } from '@angular/material';
+
 
 @Component({
   selector: 'app-root',
@@ -13,19 +13,26 @@ import 'rxjs/add/operator/map';
 export class AppComponent {
 
   title = 'Get YouTube Direct Download Links';
+  subtitle = 'By 2Tera.com';
+
   youtubeUrl = 'http://youtube.com/watch?v=zj7_4VDFQPA&list=PLC3y8-rFHvwg5gEu2KF4sbGvpUqMRSBSW';
-  youtubeLinks: YoutubeLinksModel[] = [];
+
+  youtubePageModel: YoutubePageModel = null;
+  selectedDownloadModel: YoutubeDownloadModel = null;
+  downloadUrl = '';
   errorMessage = '';
   inProcess = false;
 
   private webApiUrl = "/api/YouTube/GetLinks/";
-  constructor(private http: Http) { }
+  constructor(private youtubeService: YoutubeLinksService, private windowService: WindowService) { }
 
   getLinksButtonOnClick(): void {
     this.errorMessage = '';
     this.inProcess = true;
-    this.getLinks().subscribe(
-      () => { },
+    this.selectedDownloadModel = null;
+    this.youtubeService.getLinks(this.youtubeUrl)
+      .subscribe(
+      (response: any) => { this.youtubePageModel = response; },
       (errorMessage: any) => {
         this.errorMessage = errorMessage;
         this.inProcess = false;
@@ -33,43 +40,32 @@ export class AppComponent {
       () => { this.inProcess = false; });
   }
 
-  private getLinks(): Observable<YoutubeLinksModel> {
-    let headers = new Headers({ 'Content-Type': 'application/json' });
-    let options = new RequestOptions({ headers: headers });
-    return this.http.post(this.webApiUrl, { VideoUrl: this.youtubeUrl }, options)
-      .map(res => this.extractData(res))
-      .catch(this.handleError);
+  getDownloadLinksOnClick(): void {
+    this.errorMessage = '';
+    this.inProcess = true;
+    this.youtubeService.getDownloadLinks(this.selectedDownloadModel)
+      .subscribe(
+      (response: any) => {
+        this.downloadUrl = response;
+        this.windowService.nativeWindow.location = `${window.location.href}/${this.downloadUrl}`;
+      },
+      (errorMessage: any) => {
+        this.selectedDownloadModel = null;
+        this.errorMessage = errorMessage;
+        this.inProcess = false;
+      },
+      () => {
+        this.inProcess = false;
+      });
   }
 
-  private extractData(res: any): void {
-    let body = res.json();
-    this.youtubeLinks = body.map((input) => {
-      return {
-        title: input.Title,
-        quality: input.Quality,
-        type: input.Type,
-        downloadUrl: input.DownloadUrl
-      }
-    });
-  }
-
-  private handleError(error: Response | any) {
-    // In a real world app, you might use a remote logging infrastructure
-    let errMsg: string;
-    if (error instanceof Response) {
-      let body;
-      try {
-        body = error.json() || '';
-      }
-      catch(exception)
-      {
-        body = error;
-      }
-      const err = body.error || body.Error || body.ErrorMessage || JSON.stringify(body);
-      errMsg = `Code: ${error.status} <br /> StatusText: ${error.statusText || ''} <br /> Message: ${err}`;
-    } else {
-      errMsg = error.message ? error.message : error.toString();
-    }
-    return Observable.throw(errMsg);
+  selectRadioButtonOnChange(event: any, selectedLinkModel: YoutubeLinkModel): void {
+    let radioButton: MdRadioButton = event.source;
+    if (!radioButton.checked) return;
+    this.selectedDownloadModel = {
+      PageTitle: this.youtubePageModel.pageTitle,
+      Type: selectedLinkModel.type,
+      Url: selectedLinkModel.downloadUrl
+    };
   }
 }

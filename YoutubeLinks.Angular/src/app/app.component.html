@@ -1,12 +1,12 @@
 <md-card>
   <md-card-header class="bg-gray">
     <md-card-title>
-      <h1> {{title}} </h1>
+      <h1>{{title}}</h1>
     </md-card-title>
-    <md-card-subtitle>By Mohammad Dayyan</md-card-subtitle>
+    <md-card-subtitle>{{subtitle}}</md-card-subtitle>
   </md-card-header>
   <md-card-content>
-    <table class="full-width">
+    <table class="width80">
       <tr>
         <td>
           <md-input-container class="full-width">
@@ -14,32 +14,38 @@
           </md-input-container>
         </td>
         <td>
-          <button md-raised-button (click)="getLinksButtonOnClick()" [disabled]="inProcess">Get links</button>
+          <button md-raised-button (click)="getLinksButtonOnClick()" [disabled]="inProcess" class="getlinks-button"><md-icon>link</md-icon> Get Links</button>
         </td>
       </tr>
     </table>
-    <hr *ngIf="youtubeLinks.length > 0 || errorMessage != ''" />
-    <table class="table" *ngIf="!inProcess && youtubeLinks.length > 0">
+    <hr *ngIf="youtubePageModel != null || errorMessage != ''" />
+    <table class="table" *ngIf="youtubePageModel != null">
       <thead>
+        <tr>
+          <td class="text-center" colspan="100"> {{youtubePageModel.pageTitle}} </td>
+        </tr>
         <tr>
           <td>#</td>
           <td>Quality</td>
           <td>Type</td>
-          <td>Download</td>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of youtubeLinks; let myIndex = index">
+        <tr *ngFor="let item of youtubePageModel.Links; let myIndex = index">
           <td>{{ myIndex + 1 }}</td>
-          <td>{{ item.quality }}</td>
-          <td>{{ item.type }}</td>
           <td>
-            <a md-mini-fab [href]="item.downloadUrl">
-              <md-icon>file_download</md-icon>
-            </a>
+            <md-radio-button name="selectTypeRadio" (change)="selectRadioButtonOnChange($event, item)">{{ item.quality }}</md-radio-button>
           </td>
+          <td>{{ item.type }}</td>
         </tr>
       </tbody>
+      <tfoot *ngIf="selectedDownloadModel != null">
+        <tr>
+          <td colspan="3" class="text-center">
+            <button md-raised-button (click)="getDownloadLinksOnClick()" class="getdownloadlinks-button"><md-icon>file_download</md-icon> Download</button>
+          </td>
+        </tr>
+      </tfoot>
     </table>
     <div class="spinner">
       <md-spinner *ngIf="inProcess"></md-spinner>
