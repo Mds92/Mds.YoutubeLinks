@@ -31,6 +31,8 @@ export class AppComponent {
     this.inProcess = true;
     this.selectedDownloadModel = null;
     this.youtubePageModel = null;
+    this.downloadUrl = '';
+    if (this.youtubeUrl == '') return;
     this.youtubeService.getLinks(this.youtubeUrl)
       .subscribe(
       (response: any) => { this.youtubePageModel = response; },

@@ -24,33 +24,37 @@ namespace YoutubeLinks.Api.Controllers
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
 
-            //return new List<YoutubeVideoModel>
-            //{
-            //    new YoutubeVideoModel
-            //    {
-            //        ITag = "22",
-            //        Title = "Test1",
-            //        Quality = "Mp4",
-            //        Type = "Video/mp4;+codecs=\"avc1.64001F,+mp4a.40.2\"",
-            //        DownloadUrl = ""
-            //    },
-            //    new YoutubeVideoModel
-            //    {
-            //        ITag = "33",
-            //        Title = "Test2",
-            //        Quality = "Mp4",
-            //        Type = "Video/webm;+codecs=\"vp8.0,+vorbis\"",
-            //        DownloadUrl = ""
-            //    },
-            //    new YoutubeVideoModel
-            //    {
-            //        ITag = "44",
-            //        Title = "Test3",
-            //        Quality = "Mp4",
-            //        Type = "Video",
-            //        DownloadUrl = ""
-            //    },
-            //};
+            return new YoutubeVideoPageModel
+            {
+                PageTitle = "عنوان صفحه",
+                Links = new List<YoutubeLinkModel>
+                {
+                    new YoutubeLinkModel
+                    {
+                        ITag = "22",
+                        Title = "Test1",
+                        Quality = "Mp4",
+                        Type = "Video/mp4;+codecs=\"avc1.64001F,+mp4a.40.2\"",
+                        DownloadUrl = ""
+                    },
+                    new YoutubeLinkModel
+                    {
+                        ITag = "33",
+                        Title = "Test2",
+                        Quality = "Mp4",
+                        Type = "Video/webm;+codecs=\"vp8.0,+vorbis\"",
+                        DownloadUrl = ""
+                    },
+                    new YoutubeLinkModel
+                    {
+                        ITag = "44",
+                        Title = "Test3",
+                        Quality = "Mp4",
+                        Type = "Video",
+                        DownloadUrl = ""
+                    },
+                }
+            };
 
             var chromeDriverExePath = ZetaLongPaths.ZlpPathHelper.Combine(HttpRuntime.AppDomainAppPath, "Assets");
             var chromeDriverService = ChromeDriverService.CreateDefaultService(chromeDriverExePath);
