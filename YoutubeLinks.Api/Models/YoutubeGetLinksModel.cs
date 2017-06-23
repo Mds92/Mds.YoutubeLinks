@@ -5,14 +5,17 @@ namespace YoutubeLinks.Api.Models
 {
     public class YoutubeDownloadModel
     {
+        /// <summary>
+        /// آدرس صفحه فیلم در یوتیوب
+        /// </summary>
         [Required]
-        public string PageTitle { get; set; }
+        public string VideoUrl { get; set; }
 
+        /// <summary>
+        /// آدرس لینک دانلود 
+        /// </summary>
         [Required]
-        public string Type { get; set; }
-
-        [Required]
-        public string Url { get; set; }
+        public int FormatCode { get; set; }
     }
 
     public class YoutubeGetLinksModel

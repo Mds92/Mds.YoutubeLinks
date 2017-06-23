@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { YoutubeLinkModel, YoutubePageModel, YoutubeDownloadModel } from './youtube-links-model';
+import { YoutubeLinkModel } from './youtube-links-models';
 import { YoutubeLinksService } from './youtube-links.service';
 import { WindowService } from './window.service';
 import { MdRadioButton } from '@angular/material';
@@ -14,39 +14,48 @@ export class AppComponent {
 
   title = 'Get YouTube Direct Download Links';
   subtitle = 'By 2Tera.com';
-  youtubeUrl = '';
-  //youtubeUrl = 'http://youtube.com/watch?v=zj7_4VDFQPA&list=PLC3y8-rFHvwg5gEu2KF4sbGvpUqMRSBSW';
+  //youtubeUrl = '';
+  youtubeUrl = 'https://www.youtube.com/watch?v=W-jPAOonCOc';
 
-  youtubePageModel: YoutubePageModel = null;
-  selectedDownloadModel: YoutubeDownloadModel = null;
   downloadUrl = '';
   errorMessage = '';
   inProcess = false;
+  youtubeLinksModel: YoutubeLinkModel[] = [];
+  selectedDownloadModel: YoutubeLinkModel = null;
 
-  private webApiUrl = "/api/YouTube/GetLinks/";
   constructor(private youtubeService: YoutubeLinksService, private windowService: WindowService) { }
+
+  public get PageTitle() : string {
+    return this.youtubeLinksModel.length <= 0 ? '' : this.youtubeLinksModel[0].Title;
+  }
+  
 
   getLinksButtonOnClick(): void {
     this.errorMessage = '';
     this.inProcess = true;
+    this.youtubeLinksModel = [];
     this.selectedDownloadModel = null;
-    this.youtubePageModel = null;
+    //this.youtubePageModel = null;
     this.downloadUrl = '';
     if (this.youtubeUrl == '') return;
     this.youtubeService.getLinks(this.youtubeUrl)
       .subscribe(
-      (response: any) => { this.youtubePageModel = response; },
+      (response: any) => { 
+        this.youtubeLinksModel = response; 
+      },
       (errorMessage: any) => {
         this.errorMessage = errorMessage;
         this.inProcess = false;
       },
-      () => { this.inProcess = false; });
+      () => { 
+        this.inProcess = false; 
+      });
   }
 
   downloadButtonOnClick(): void {
     this.errorMessage = '';
     this.inProcess = true;
-    this.youtubeService.getDownloadLinks(this.selectedDownloadModel)
+    this.youtubeService.getDownloadLinks(this.youtubeUrl, this.selectedDownloadModel)
       .subscribe(
       (response: any) => {
         let window = this.windowService.nativeWindow;
@@ -62,15 +71,12 @@ export class AppComponent {
       () => {
         this.inProcess = false;
       });
+      
   }
 
   selectRadioButtonOnChange(event: any, selectedLinkModel: YoutubeLinkModel): void {
     let radioButton: MdRadioButton = event.source;
     if (!radioButton.checked) return;
-    this.selectedDownloadModel = {
-      PageTitle: this.youtubePageModel.pageTitle,
-      Type: selectedLinkModel.type,
-      Url: selectedLinkModel.downloadUrl
-    };
+    this.selectedDownloadModel = selectedLinkModel;
   }
 }

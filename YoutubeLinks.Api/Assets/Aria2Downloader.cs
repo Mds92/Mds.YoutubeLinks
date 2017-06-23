@@ -27,8 +27,8 @@ namespace YoutubeLinks.Api
             if (!File.Exists(Aria2Path))
                 throw new Exception("Downloader not found");
 
-            var fileName = Path.GetFileName(destinationAbsoluteFileName);
-            var directoryPath = Path.GetDirectoryName(destinationAbsoluteFileName);
+            var fileName = ZlpPathHelper.GetFileNameFromFilePath(destinationAbsoluteFileName);
+            var directoryPath = ZlpPathHelper.GetDirectory(destinationAbsoluteFileName);
             if (!ZlpIOHelper.DirectoryExists(directoryPath))
                 ZlpIOHelper.CreateDirectory(directoryPath);
 

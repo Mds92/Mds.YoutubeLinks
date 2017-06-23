@@ -43,7 +43,7 @@ md-card-content{
 }
 
 .table td, .table th{
-    font-size: 18px;
+    font-size: 14px;
 }
 
 .table>thead {
@@ -71,9 +71,6 @@ md-card-content{
 .getdownloadlinks-button{
     font-size: 20px;
     padding: 15px;
-    border: 1px solid #B8EB59;
-    background: #E6FFB2;
-    color:#5CA000;
 }
 
 input[type="text"]{

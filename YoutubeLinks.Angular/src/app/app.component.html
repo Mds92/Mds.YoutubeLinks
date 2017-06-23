@@ -18,36 +18,50 @@
         </td>
       </tr>
     </table>
-    <hr *ngIf="youtubePageModel != null || errorMessage != ''" />
-    <table class="table" *ngIf="youtubePageModel != null">
+    <hr *ngIf="youtubeLinksModel.length > 0 || errorMessage != ''" />
+    <table class="table" *ngIf="youtubeLinksModel.length > 0">
       <thead>
         <tr>
-          <td class="text-center" colspan="100"> {{youtubePageModel.pageTitle}} </td>
+          <td colspan="100" class="text-center">{{PageTitle}} </td>
         </tr>
         <tr>
           <td>#</td>
-          <td>Quality</td>
-          <td>Type</td>
+          <td>Title</td>
+          <td>Format Code</td>
+          <td>Audio Format</td>
+          <td>File Extension</td>
+          <td>Is3D</td>
+          <td>Is Adaptive</td>
+          <td>Is Encrypted</td>
+          <td>Link</td>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of youtubePageModel.Links; let myIndex = index">
+        <tr *ngFor="let item of youtubeLinksModel; let myIndex = index">
           <td>{{ myIndex + 1 }}</td>
           <td>
-            <md-radio-button name="selectTypeRadio" (change)="selectRadioButtonOnChange($event, item)">{{ item.quality }}</md-radio-button>
+            <md-radio-button name="selectTypeRadio" (change)="selectRadioButtonOnChange($event, item)">{{ item.Resolution
+              <=0 ? 'Sound' : item.Resolution }}</md-radio-button>
           </td>
-          <td>{{ item.type }}</td>
+          <td>{{ item.FormatCode }}</td>
+          <td>{{ item.AudioFormat }}</td>
+          <td>{{ item.FileExtension }}</td>
+          <td>{{ item.Is3D }}</td>
+          <td>{{ item.IsAdaptive }}</td>
+          <td>{{ item.IsEncrypted }}</td>
+          <td><a [href]="item.Uri">Link</a></td>
         </tr>
       </tbody>
       <tfoot *ngIf="selectedDownloadModel != null && !inProcess">
         <tr *ngIf="downloadUrl == ''">
-          <td colspan="3" class="text-center">
+          <td colspan="90" class="text-center">
             <button md-raised-button (click)="downloadButtonOnClick()" class="getdownloadlinks-button"><md-icon>file_download</md-icon> Download</button>
-          </td>          
+          </td>
         </tr>
         <tr *ngIf="downloadUrl != ''">
           <td colspan="3" class="text-center">
-            <h4 class="text-blue">Your download will start, or you can download it by click <a [href]="downloadUrl">here</a>, It's valid until next 6 hours.</h4>
+            <h4 class="text-blue">Your download will start, or you can download it by click <a [href]="downloadUrl">here</a>, It's valid until
+              next 6 hours.</h4>
           </td>
         </tr>
       </tfoot>
