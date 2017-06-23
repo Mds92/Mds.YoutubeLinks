@@ -9,8 +9,8 @@ using OpenQA.Selenium.Chrome;
 using YoutubeLinks.Api.Models;
 using YoutubeLinks.Api.Filters;
 using System.Collections.Generic;
-using System.Diagnostics;
 using OpenQA.Selenium.Support.UI;
+using System.Diagnostics;
 using ZetaLongPaths;
 
 namespace YoutubeLinks.Api.Controllers
@@ -81,7 +81,7 @@ namespace YoutubeLinks.Api.Controllers
                     var pageTitle = (string)js.ExecuteScript(@"return document.title");
                     var videosObjectJson = JsonConvert.SerializeObject(videosObjectList);
                     var internalVideos = JsonConvert.DeserializeObject<List<YoutubeVideoInternalModel>>(videosObjectJson);
-                    youtubeVideoPageModel.PageTitle = pageTitle.Replace("- YouTube", "").Trim();
+                    youtubeVideoPageModel.PageTitle = pageTitle.Trim();
                     youtubeVideoPageModel.Links.AddRange(internalVideos.Select(youtubeVideoInternalModel => new YoutubeLinkModel
                     {
                         ITag = youtubeVideoInternalModel.itag,
@@ -113,9 +113,13 @@ namespace YoutubeLinks.Api.Controllers
             // Video/mp4;+codecs="avc1.64001F,+mp4a.40.2"
             var extension = type.Substring(0, type.IndexOf(";", StringComparison.InvariantCultureIgnoreCase));
             extension = extension.Remove(0, extension.IndexOf("/", StringComparison.InvariantCultureIgnoreCase) + 1);
-            var fullFileName = ZlpPathHelper.Combine(destinationDirectory, $"{model.PageTitle}_{Guid.NewGuid()}.{extension}".RemoveIllegalCharsForUrl());
-            //Aria2Downloader.DownloadFile(downloadUrl, fullFileName, "http://127.0.0.1:54076/", 0, message => { Trace.WriteLine(message); });
+#if !DEBUG
+            var fullFileName = ZlpPathHelper.Combine(destinationDirectory, $"{model.PageTitle.RemoveIllegalCharsForUrl()}_{Guid.NewGuid()}.{extension}");
+            Aria2Downloader.DownloadFile(downloadUrl, fullFileName, "", 0, message => { Trace.Write(message); });
             return fullFileName.Remove(0, fullFileName.IndexOf("DownloadTemp", StringComparison.InvariantCultureIgnoreCase));
+#else
+            return "/DownloadTemp/Angular-2-Tutorial-1-Introduction-YouTube_5923fd9f-4499-4c21-9a53-fea29cc003cb.mp4";
+#endif
         }
     }
 }

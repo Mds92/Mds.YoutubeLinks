@@ -14,8 +14,8 @@ export class AppComponent {
 
   title = 'Get YouTube Direct Download Links';
   subtitle = 'By 2Tera.com';
-
-  youtubeUrl = 'http://youtube.com/watch?v=zj7_4VDFQPA&list=PLC3y8-rFHvwg5gEu2KF4sbGvpUqMRSBSW';
+  youtubeUrl = '';
+  //youtubeUrl = 'http://youtube.com/watch?v=zj7_4VDFQPA&list=PLC3y8-rFHvwg5gEu2KF4sbGvpUqMRSBSW';
 
   youtubePageModel: YoutubePageModel = null;
   selectedDownloadModel: YoutubeDownloadModel = null;
@@ -30,6 +30,7 @@ export class AppComponent {
     this.errorMessage = '';
     this.inProcess = true;
     this.selectedDownloadModel = null;
+    this.youtubePageModel = null;
     this.youtubeService.getLinks(this.youtubeUrl)
       .subscribe(
       (response: any) => { this.youtubePageModel = response; },
@@ -40,14 +41,16 @@ export class AppComponent {
       () => { this.inProcess = false; });
   }
 
-  getDownloadLinksOnClick(): void {
+  downloadButtonOnClick(): void {
     this.errorMessage = '';
     this.inProcess = true;
     this.youtubeService.getDownloadLinks(this.selectedDownloadModel)
       .subscribe(
       (response: any) => {
-        this.downloadUrl = response;
-        this.windowService.nativeWindow.location = `${window.location.href}/${this.downloadUrl}`;
+        let window = this.windowService.nativeWindow;
+        this.downloadUrl = response.replace(/^\/+/img, '');
+        this.downloadUrl = `${window.location.href.replace(/\/+$/img, '')}/${this.downloadUrl}`;
+        window.location = this.downloadUrl;
       },
       (errorMessage: any) => {
         this.selectedDownloadModel = null;

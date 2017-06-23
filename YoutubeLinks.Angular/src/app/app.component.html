@@ -39,11 +39,14 @@
           <td>{{ item.type }}</td>
         </tr>
       </tbody>
-      <tfoot *ngIf="selectedDownloadModel != null">
+      <tfoot *ngIf="selectedDownloadModel != null && !inProcess">
         <tr>
           <td colspan="3" class="text-center">
-            <button md-raised-button (click)="getDownloadLinksOnClick()" class="getdownloadlinks-button"><md-icon>file_download</md-icon> Download</button>
-          </td>
+            <button md-raised-button (click)="downloadButtonOnClick()" class="getdownloadlinks-button"><md-icon>file_download</md-icon> Download</button>
+          </td>          
+        </tr>
+        <tr>
+          <td colspan="3">Your download will start</td>
         </tr>
       </tfoot>
     </table>
