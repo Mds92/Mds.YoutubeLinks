@@ -97,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Assets\FFmpeg.cs" />
     <Compile Include="Assets\Aria2Downloader.cs" />
     <Compile Include="Assets\ConfigurationHelper.cs" />
     <Compile Include="Assets\CachedParams.cs" />

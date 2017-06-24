@@ -102,13 +102,20 @@ namespace YoutubeLinks.Api.Controllers
         {
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
+            var proxy = "";
+#if DEBUG
+            proxy = "http://127.0.0.1:50694";
+#endif
             var youtube = YouTube.Default;
             var allVideos = youtube.GetAllVideos(model.VideoUrl).ToList();
             var video = allVideos.FirstOrDefault(q => q.FormatCode == model.FormatCode);
             if (video == null)
                 throw new Exception("Selected video not found");
             var destinationDirectory = ZlpPathHelper.Combine(HttpRuntime.AppDomainAppPath, "DownloadTemp");
-            var videoFileName = ZlpPathHelper.Combine(destinationDirectory, $"{video.Title.RemoveIllegalCharsForUrl()}-{Guid.NewGuid()}{video.FileExtension}");
+            var videoFilePath = ZlpPathHelper.Combine(destinationDirectory, $"{video.Title.RemoveIllegalCharsForUrl()}-{Guid.NewGuid()}{video.FileExtension}");
+            var finalFilePath = ZlpPathHelper.Combine(destinationDirectory, $"{video.Title.RemoveIllegalCharsForUrl()}-{Guid.NewGuid()}{video.FileExtension}");
+            var soundFilePath = "";
+            var tasks = new List<Task>();
             YouTubeVideo sound = null;
             if (video.AudioFormat == AudioFormat.Unknown)
             {
@@ -116,23 +123,22 @@ namespace YoutubeLinks.Api.Controllers
                 if (sound == null)
                     throw new Exception("Selected video not found");
             }
-            var downloadVideoTask = Task.Run(() =>
+            tasks.Add(Task.Run(() =>
             {
-                Aria2Downloader.DownloadFile(video.Uri, videoFileName, "", 0, message => { Trace.Write(message); });
-            });
-            Task downloadSoundTask = null;
+                Aria2Downloader.DownloadFile(video.Uri, videoFilePath, proxy, 0, message => { Trace.Write(message); });
+            }));
             if (sound != null)
             {
-                var soundFileName = ZlpPathHelper.Combine(destinationDirectory, $"Sound-{sound.Title.RemoveIllegalCharsForUrl()}-{Guid.NewGuid()}{sound.FileExtension}");
-                downloadSoundTask = Task.Run(() =>
+                soundFilePath = ZlpPathHelper.Combine(destinationDirectory, $"Sound-{sound.Title.RemoveIllegalCharsForUrl()}-{Guid.NewGuid()}{sound.FileExtension}");
+                tasks.Add(Task.Run(() =>
                 {
-                    Aria2Downloader.DownloadFile(sound.Uri, soundFileName, "", 0, message => { Trace.Write(message); });
-                });
+                    Aria2Downloader.DownloadFile(sound.Uri, soundFilePath, proxy, 0, message => { Trace.Write(message); });
+                }));
             }
-            downloadVideoTask.Wait();
-            downloadSoundTask?.Wait();
-
-            return "/DownloadTemp/Angular-2-Tutorial-1-Introduction-YouTube_5923fd9f-4499-4c21-9a53-fea29cc003cb.mp4";
+            Parallel.ForEach(tasks, task => task.Wait());
+            if (soundFilePath != "")
+                FFmpeg.MergeVideoAudio(videoFilePath, soundFilePath, finalFilePath, message => { Trace.Write(message); });
+            return $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(finalFilePath)}";
         }
     }
 }

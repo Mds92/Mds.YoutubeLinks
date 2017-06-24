@@ -33,15 +33,15 @@
           <td>Is3D</td>
           <td>Is Adaptive</td>
           <td>Is Encrypted</td>
-          <td>Link</td>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let item of youtubeLinksModel; let myIndex = index">
           <td>{{ myIndex + 1 }}</td>
           <td>
-            <md-radio-button name="selectTypeRadio" (change)="selectRadioButtonOnChange($event, item)">{{ item.Resolution
-              <=0 ? 'Sound' : item.Resolution }}</md-radio-button>
+            <md-radio-button name="selectTypeRadio" (change)="selectRadioButtonOnChange($event, item)">
+              {{ item.Resolution <= 0 ? 'Sound' : item.Resolution + 'p' }}
+            </md-radio-button>
           </td>
           <td>{{ item.FormatCode }}</td>
           <td>{{ item.AudioFormat }}</td>
@@ -49,7 +49,6 @@
           <td>{{ item.Is3D }}</td>
           <td>{{ item.IsAdaptive }}</td>
           <td>{{ item.IsEncrypted }}</td>
-          <td><a [href]="item.Uri">Link</a></td>
         </tr>
       </tbody>
       <tfoot *ngIf="selectedDownloadModel != null && !inProcess">
