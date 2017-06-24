@@ -262,3 +262,5 @@ __pycache__/
 /YoutubeLinks.Api/Assets/ffprobe.exe
 /YoutubeLinks.Api/Assets/ffplay.exe
 /YoutubeLinks.Api/Assets/ffmpeg.exe
+/YoutubeLinks.Api/Assets/chromedriver.exe
+/YoutubeLinks.Api/Assets/aria2c.exe
