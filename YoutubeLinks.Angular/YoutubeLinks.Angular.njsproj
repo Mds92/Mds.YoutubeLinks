@@ -39,12 +39,11 @@
     <Content Include="e2e\tsconfig.e2e.json" />
     <Content Include="package-lock.json" />
     <Content Include="package.json" />
-    <Content Include="proxy.config.json" />
     <Content Include="README.md" />
     <Content Include="src\app\app.component.css" />
     <Content Include="src\app\app.component.html" />
     <Content Include="src\assets\.gitkeep" />
-    <Content Include="src\favicon.ico" />
+    <Content Include="src\favicon.png" />
     <Content Include="src\index.html" />
     <Content Include="src\styles.css" />
     <Content Include="src\tsconfig.app.json" />
@@ -78,6 +77,7 @@
   <ItemGroup>
     <Compile Include="karma.conf.js" />
     <Compile Include="protractor.conf.js" />
+    <Compile Include="proxy.config.js" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
