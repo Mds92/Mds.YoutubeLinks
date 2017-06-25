@@ -18,6 +18,11 @@
 .text-center{
     text-align: center;
 }
+
+.text-muted{
+    opacity: 0.5;
+}
+
 .center-block{
     display: block;
     margin: 0 auto;
@@ -62,9 +67,15 @@ md-card-content{
     padding: 10px;
 }
 
-.spinner{
+.please-wait{
     margin: 0 auto;
-    width: 100px;
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+}
+
+.please-wait md-spinner{
+    margin: 0 auto;
 }
 
 .getlinks-button,

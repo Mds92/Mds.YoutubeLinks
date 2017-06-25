@@ -70,12 +70,6 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.EnterpriseServices" />
-    <Reference Include="WebDriver, Version=3.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Selenium.WebDriver.3.4.0\lib\net40\WebDriver.dll</HintPath>
-    </Reference>
-    <Reference Include="WebDriver.Support, Version=3.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Selenium.Support.3.4.0\lib\net40\WebDriver.Support.dll</HintPath>
-    </Reference>
     <Reference Include="ZetaLongPaths, Version=1.0.0.18, Culture=neutral, PublicKeyToken=b764f59068f31f38, processorArchitecture=MSIL">
       <HintPath>..\packages\ZetaLongPaths.1.0.0.18\lib\net40-full\ZetaLongPaths.dll</HintPath>
     </Reference>

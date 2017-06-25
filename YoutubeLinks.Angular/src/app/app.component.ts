@@ -14,8 +14,8 @@ export class AppComponent {
 
   title = 'Get YouTube Direct Download Links';
   subtitle = 'By 2Tera.com';
-  //youtubeUrl = '';
-  youtubeUrl = 'https://www.youtube.com/watch?v=W-jPAOonCOc';
+  youtubeUrl = '';
+  //youtubeUrl = 'https://www.youtube.com/watch?v=W-jPAOonCOc';
 
   downloadUrl = '';
   errorMessage = '';

@@ -2,14 +2,9 @@
 using System.Web;
 using System.Linq;
 using System.Web.Http;
-using Newtonsoft.Json;
-using OpenQA.Selenium;
-using System.Collections;
-using OpenQA.Selenium.Chrome;
 using YoutubeLinks.Api.Models;
 using YoutubeLinks.Api.Filters;
 using System.Collections.Generic;
-using OpenQA.Selenium.Support.UI;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using VideoLibrary;
@@ -20,57 +15,17 @@ namespace YoutubeLinks.Api.Controllers
     [RequestAuthorization]
     public class YouTubeController : BaseController
     {
-        private YoutubeVideoPageModel GetLinksArchived(YoutubeGetLinksModel model)
+        private string GetVideoFileName(YouTubeVideo video, bool useGuid = false)
         {
-            if (!ModelState.IsValid)
-                throw new Exception("Data is invalid");
-
-            var chromeDriverExePath = ZlpPathHelper.Combine(HttpRuntime.AppDomainAppPath, "Assets");
-            var chromeDriverService = ChromeDriverService.CreateDefaultService(chromeDriverExePath);
-            chromeDriverService.SuppressInitialDiagnosticInformation = true;
-
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--log-level=3");
-
-            var youtubeVideoPageModel = new YoutubeVideoPageModel();
-            Exception exception = null;
-
-            using (var chromeDriver = new ChromeDriver(chromeDriverService, chromeOptions))
+            if (useGuid)
             {
-                try
-                {
-                    chromeDriver.Navigate().GoToUrl(model.VideoUrl);
-                    var webDriverWait = new WebDriverWait(chromeDriver, TimeSpan.FromSeconds(5));
-                    webDriverWait.Until(ExpectedConditions.ElementExists(By.Id("player-mole-container")));
-                    var js = (IJavaScriptExecutor)chromeDriver;
-                    var videosObjectList = (IList)js.ExecuteScript(
-                        @"return ytplayer.config.args.url_encoded_fmt_stream_map
-                            .split(',')
-                            .map(item => item
-                            .split('&')
-                            .reduce((prev, curr) => (curr = curr.split('='),
-                                Object.assign(prev, {[curr[0]]: decodeURIComponent(curr[1])})
-                            ), {}))");
-                    var pageTitle = (string)js.ExecuteScript(@"return document.title");
-                    var videosObjectJson = JsonConvert.SerializeObject(videosObjectList);
-                    var internalVideos = JsonConvert.DeserializeObject<List<YoutubeVideoInternalModel>>(videosObjectJson);
-                    youtubeVideoPageModel.PageTitle = pageTitle.Trim();
-                    youtubeVideoPageModel.Links.AddRange(internalVideos.Select(youtubeVideoInternalModel => new YoutubeLinkModel
-                    {
-                        ITag = youtubeVideoInternalModel.itag,
-                        DownloadUrl = youtubeVideoInternalModel.url.ToBase64(),
-                        Quality = youtubeVideoInternalModel.quality.FirstCharToUpper(),
-                        Title = youtubeVideoInternalModel.quality.FirstCharToUpper(),
-                        Type = youtubeVideoInternalModel.type.FirstCharToUpper()
-                    }));
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                }
+                return video.Resolution < 0
+                    ? $"{video.Title.RemoveIllegalCharsForUrl()}-Audio-{Guid.NewGuid().ToString().RemoveIllegalCharsForUrl()}{video.FileExtension}"
+                    : $"{video.Title.RemoveIllegalCharsForUrl()}-{video.Resolution}p-{Guid.NewGuid().ToString().RemoveIllegalCharsForUrl()}{video.FileExtension}";
             }
-            if (exception != null) throw exception;
-            return youtubeVideoPageModel;
+            return video.Resolution < 0 
+                ? $"{video.Title.RemoveIllegalCharsForUrl()}-Audio{video.FileExtension}" 
+                : $"{video.Title.RemoveIllegalCharsForUrl()}-{video.Resolution}p{video.FileExtension}";
         }
 
         [HttpPost]
@@ -112,33 +67,41 @@ namespace YoutubeLinks.Api.Controllers
             if (video == null)
                 throw new Exception("Selected video not found");
             var destinationDirectory = ZlpPathHelper.Combine(HttpRuntime.AppDomainAppPath, "DownloadTemp");
-            var videoFilePath = ZlpPathHelper.Combine(destinationDirectory, $"{video.Title.RemoveIllegalCharsForUrl()}-{Guid.NewGuid()}{video.FileExtension}");
-            var finalFilePath = ZlpPathHelper.Combine(destinationDirectory, $"{video.Title.RemoveIllegalCharsForUrl()}-{Guid.NewGuid()}{video.FileExtension}");
-            var soundFilePath = "";
+            var videoFilePath = ZlpPathHelper.Combine(destinationDirectory, GetVideoFileName(video));
+            var finalFilePath = ZlpPathHelper.Combine(destinationDirectory, GetVideoFileName(video, true));
+            var audioFilePath = "";
+
+            if(ZlpIOHelper.FileExists(videoFilePath))
+                return $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(videoFilePath)}";
+
             var tasks = new List<Task>();
-            YouTubeVideo sound = null;
+            YouTubeVideo audio = null;
             if (video.AudioFormat == AudioFormat.Unknown)
             {
-                sound = allVideos.FirstOrDefault(q => q.Resolution < 0 && q.AudioFormat != AudioFormat.Unknown && q.Format == VideoFormat.Mp4);
-                if (sound == null)
+                audio = allVideos.FirstOrDefault(q => q.Resolution < 0 && q.AudioFormat != AudioFormat.Unknown && q.Format == VideoFormat.Mp4);
+                if (audio == null)
                     throw new Exception("Selected video not found");
             }
             tasks.Add(Task.Run(() =>
             {
                 Aria2Downloader.DownloadFile(video.Uri, videoFilePath, proxy, 0, message => { Trace.Write(message); });
             }));
-            if (sound != null)
+            if (audio != null)
             {
-                soundFilePath = ZlpPathHelper.Combine(destinationDirectory, $"Sound-{sound.Title.RemoveIllegalCharsForUrl()}-{Guid.NewGuid()}{sound.FileExtension}");
+                audioFilePath = ZlpPathHelper.Combine(destinationDirectory, GetVideoFileName(audio));
                 tasks.Add(Task.Run(() =>
                 {
-                    Aria2Downloader.DownloadFile(sound.Uri, soundFilePath, proxy, 0, message => { Trace.Write(message); });
+                    Aria2Downloader.DownloadFile(audio.Uri, audioFilePath, proxy, 0, message => { Trace.Write(message); });
                 }));
             }
             Parallel.ForEach(tasks, task => task.Wait());
-            if (soundFilePath != "")
-                FFmpeg.MergeVideoAudio(videoFilePath, soundFilePath, finalFilePath, message => { Trace.Write(message); });
-            return $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(finalFilePath)}";
+            if (audioFilePath != "")
+            {
+                FFmpeg.MergeVideoAudio(videoFilePath, audioFilePath, finalFilePath, message => { Trace.Write(message); });
+                ZlpIOHelper.CopyFile(finalFilePath, videoFilePath, true);
+                ZlpIOHelper.DeleteFile(finalFilePath);
+            }
+            return $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(videoFilePath)}";
         }
     }
 }

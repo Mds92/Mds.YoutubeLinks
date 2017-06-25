@@ -39,7 +39,7 @@
         <tr *ngFor="let item of youtubeLinksModel; let myIndex = index">
           <td>{{ myIndex + 1 }}</td>
           <td>
-            <md-radio-button name="selectTypeRadio" (change)="selectRadioButtonOnChange($event, item)">
+            <md-radio-button name="selectTypeRadio" (change)="selectRadioButtonOnChange($event, item)" [disabled]="inProcess">
               {{ item.Resolution <= 0 ? 'Sound' : item.Resolution + 'p' }}
             </md-radio-button>
           </td>
@@ -53,20 +53,20 @@
       </tbody>
       <tfoot *ngIf="selectedDownloadModel != null && !inProcess">
         <tr *ngIf="downloadUrl == ''">
-          <td colspan="90" class="text-center">
+          <td colspan="100" class="text-center">
             <button md-raised-button (click)="downloadButtonOnClick()" class="getdownloadlinks-button"><md-icon>file_download</md-icon> Download</button>
           </td>
         </tr>
         <tr *ngIf="downloadUrl != ''">
-          <td colspan="3" class="text-center">
-            <h4 class="text-blue">Your download will start, or you can download it by click <a [href]="downloadUrl">here</a>, It's valid until
-              next 6 hours.</h4>
+          <td colspan="100" class="text-center">
+            <h3 class="text-blue">Your download will start, or you can download it by click <a [href]="downloadUrl">here</a>, It's valid until next 6 hours.</h3>
           </td>
         </tr>
       </tfoot>
     </table>
-    <div class="spinner">
-      <md-spinner *ngIf="inProcess"></md-spinner>
+    <div class="please-wait" *ngIf="inProcess">
+      <md-spinner></md-spinner>
+      <span class="text-muted">Your movie is downloading, It depend's on your movie volume.</span>
     </div>
     <div class="text-danger" *ngIf="errorMessage != ''" [innerHTML]="errorMessage"></div>
   </md-card-content>
