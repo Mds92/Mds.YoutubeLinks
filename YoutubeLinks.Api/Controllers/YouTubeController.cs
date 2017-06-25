@@ -49,6 +49,13 @@ namespace YoutubeLinks.Api.Controllers
                     videos.Remove(youTubeVideo);
             }
 
+#if DEBUG
+            foreach (var youTubeVideo in videos)
+            {
+                Trace.WriteLine(youTubeVideo.Uri);
+            }
+#endif
+
             return videos.OrderByDescending(q => q.Resolution).ToList();
         }
 
@@ -59,7 +66,7 @@ namespace YoutubeLinks.Api.Controllers
                 throw new Exception("Data is invalid");
             var proxy = "";
 #if DEBUG
-            proxy = "http://127.0.0.1:50694";
+            proxy = "http://127.0.0.1:56215";
 #endif
             var youtube = YouTube.Default;
             var allVideos = youtube.GetAllVideos(model.VideoUrl).ToList();
