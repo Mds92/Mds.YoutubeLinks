@@ -97,11 +97,10 @@
             <button md-raised-button (click)="downloadButtonOnClick()" class="btn-primary"><md-icon>file_download</md-icon> Download </button>
           </div>
         </div>
-        <div class="row" *ngIf="downloadUrl != ''">
-          <div class="col-sm-12">
-            <h3 class="text-blue">Your download will start, or you can download it by click <a [href]="downloadUrl">here</a>, It's valid until
-              next 6 hours.</h3>
-          </div>
+        <hr *ngIf="downloadUrl != ''"/>
+        <div class="alert alert-success" role="alert" *ngIf="downloadUrl != ''">
+          <h4 class="text-success">Your download will start, or you can download it by click <a [href]="downloadUrl">here</a>.<br> 
+          <span class="text-danger">It's valid until next 3 hours.</span></h4>
         </div>
       </div>
     </div>

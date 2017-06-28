@@ -36,11 +36,32 @@ namespace YoutubeLinks.Api.Controllers
             }
             return $"{size:0.#} {units[unit]}";
         }
+        private static string GetAbsoluteFilePath(string filePath)
+        {
+            var destinationDirectory = ZlpPathHelper.Combine(HttpRuntime.AppDomainAppPath, "DownloadTemp");
+            return ZlpPathHelper.Combine(destinationDirectory, filePath);
+        }
+        private static string GetRelativeFilePath(string fileName)
+        {
+            return $"/DownloadTemp/{fileName}";
+        }
+        private static string GetProxy
+        {
+            get
+            {
+                var proxy = "";
+#if DEBUG
+                proxy = "http://127.0.0.1:51733";
+#endif
+                return proxy;
+            }
+        }
         private static Task<VideoInfo> GetVideoInfo(string videoUrl)
         {
             var youtubeClient = new YoutubeClient();
             return youtubeClient.GetVideoInfoAsync(NormalizeId(videoUrl));
         }
+        private const string DomainName = "youtube.2tera.com";
 
         [HttpPost]
         public async Task<YoutubeVideoInfoModel> GetLinks(YoutubeGetLinksModel model)
@@ -51,10 +72,9 @@ namespace YoutubeLinks.Api.Controllers
             var newImageHighResUrl = "";
             if (!string.IsNullOrWhiteSpace(videoInfo.ImageHighResUrl))
             {
-                var destinationDirectory = ZlpPathHelper.Combine(HttpRuntime.AppDomainAppPath, "DownloadTemp");
-                var thumbnailFilePath = ZlpPathHelper.Combine(destinationDirectory, $"{Guid.NewGuid()}{ZlpPathHelper.GetExtension(videoInfo.ImageHighResUrl)}");
-                Aria2Downloader.DownloadFile(videoInfo.ImageHighResUrl, thumbnailFilePath, "", 0, message => { Trace.Write(message); });
-                newImageHighResUrl = $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(thumbnailFilePath)}";
+                var thumbnailFilePath = GetAbsoluteFilePath($"{Guid.NewGuid()}{ZlpPathHelper.GetExtension(videoInfo.ImageHighResUrl)}");
+                Aria2Downloader.DownloadFile(videoInfo.ImageHighResUrl, thumbnailFilePath, GetProxy, 0, message => { Trace.Write(message); });
+                newImageHighResUrl = GetRelativeFilePath(ZlpPathHelper.GetFileNameFromFilePath(thumbnailFilePath));
             }
             var youtubeVideoInfoModel = new YoutubeVideoInfoModel
             {
@@ -98,48 +118,41 @@ namespace YoutubeLinks.Api.Controllers
         {
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
-            var proxy = "";
-#if DEBUG
-            proxy = "http://127.0.0.1:57716";
-#endif
             var videoInfo = await GetVideoInfo(model.VideoUrl);
             if (videoInfo == null)
                 throw new Exception("Selected video not found");
 
-            AudioStreamInfo audioStreamInfo = null;
+            AudioStreamInfo audioStreamInfo;
             var audioFilePath = "";
-            var destinationDirectory = ZlpPathHelper.Combine(HttpRuntime.AppDomainAppPath, "DownloadTemp");
-
             if (model.IsAudio)
             {
                 audioStreamInfo = videoInfo.AudioStreams.FirstOrDefault(q => q.Itag == model.Itag);
                 if (audioStreamInfo == null)
                     throw new Exception("Selected audio not found");
-                audioFilePath = ZlpPathHelper.Combine(destinationDirectory, $"{videoInfo.Title.RemoveIllegalCharsForUrl()}-Audio.{audioStreamInfo.Container.ToString().ToLower()}");
-                Aria2Downloader.DownloadFile(audioStreamInfo.Url, audioFilePath, proxy, 0, message => { Trace.Write(message); });
+                audioFilePath = GetAbsoluteFilePath($"{videoInfo.Title.RemoveIllegalCharsForUrl()}-{DomainName}.{audioStreamInfo.Container.ToString().ToLower()}");
+                Aria2Downloader.DownloadFile(audioStreamInfo.Url, audioFilePath, GetProxy, 0, message => { Trace.Write(message); });
                 return $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(audioFilePath)}";
             }
             var videoStreamInfo = videoInfo.VideoStreams.FirstOrDefault(q => q.Itag == model.Itag);
             if (videoStreamInfo == null)
                 throw new Exception("Selected video not found");
-            var videoFileName = $"{videoInfo.Title.RemoveIllegalCharsForUrl()}-{videoStreamInfo.VideoQualityLabel}.{videoStreamInfo.Container.ToString().ToLower()}";
+            var videoFileName = $"{videoInfo.Title.RemoveIllegalCharsForUrl()}-{videoStreamInfo.VideoQualityLabel}-{DomainName}.{videoStreamInfo.Container.ToString().ToLower()}";
             var videoTempFileName = $"{Guid.NewGuid()}.{videoStreamInfo.Container.ToString().ToLower()}";
-            var videoTempFilePath = ZlpPathHelper.Combine(destinationDirectory, videoTempFileName);
-            var finalVideoFilePath = ZlpPathHelper.Combine(destinationDirectory, videoFileName);
-            if (ZlpIOHelper.FileExists(finalVideoFilePath))
-                return $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(finalVideoFilePath)}";
+            var videoTempFilePath = GetAbsoluteFilePath(videoTempFileName);
+            var finalVideoFilePath = GetAbsoluteFilePath(videoFileName);
+            if (ZlpIOHelper.FileExists(finalVideoFilePath)) return GetRelativeFilePath(ZlpPathHelper.GetFileNameFromFilePath(finalVideoFilePath));
             var tasks = new List<Task>();
             audioStreamInfo = videoInfo.AudioStreams.OrderByDescending(q => q.Bitrate).FirstOrDefault(q => q.Container == Container.M4A || q.Container == Container.Mp4);
             tasks.Add(Task.Run(() =>
             {
-                Aria2Downloader.DownloadFile(videoStreamInfo.Url, videoTempFilePath, proxy, 0, message => { Trace.Write(message); });
+                Aria2Downloader.DownloadFile(videoStreamInfo.Url, videoTempFilePath, GetProxy, 0, message => { Trace.Write(message); });
             }));
             if (audioStreamInfo != null)
             {
-                audioFilePath = ZlpPathHelper.Combine(destinationDirectory, $"{videoInfo.Title.RemoveIllegalCharsForUrl()}-Audio.{audioStreamInfo.Container.ToString().ToLower()}");
+                audioFilePath = GetAbsoluteFilePath($"{videoInfo.Title.RemoveIllegalCharsForUrl()}-{DomainName}-audio.{audioStreamInfo.Container.ToString().ToLower()}");
                 tasks.Add(Task.Run(() =>
                 {
-                    Aria2Downloader.DownloadFile(audioStreamInfo.Url, audioFilePath, proxy, 0, message => { Trace.Write(message); });
+                    Aria2Downloader.DownloadFile(audioStreamInfo.Url, audioFilePath, GetProxy, 0, message => { Trace.Write(message); });
                 }));
             }
             Parallel.ForEach(tasks, task => task.Wait());
@@ -147,11 +160,11 @@ namespace YoutubeLinks.Api.Controllers
             {
                 ZlpIOHelper.CopyFile(videoTempFilePath, finalVideoFilePath, true);
                 ZlpIOHelper.DeleteFile(videoTempFilePath);
-                return $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(finalVideoFilePath)}";
+                return GetRelativeFilePath(ZlpPathHelper.GetFileNameFromFilePath(finalVideoFilePath));
             }
             FFmpeg.MergeVideoAudio(videoTempFilePath, audioFilePath, finalVideoFilePath, message => { Trace.Write(message); });
             ZlpIOHelper.DeleteFile(videoTempFilePath);
-            return $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(finalVideoFilePath)}";
+                return GetRelativeFilePath(ZlpPathHelper.GetFileNameFromFilePath(finalVideoFilePath));
         }
     }
 }
