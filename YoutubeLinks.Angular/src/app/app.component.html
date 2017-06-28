@@ -1,73 +1,126 @@
-<md-card>
-  <md-card-header class="bg-gray">
+<md-card itemscope>
+  <md-card-header class="well">
     <md-card-title>
-      <h1>{{title}}</h1>
+      <h1 itemprop="name">{{title}}</h1>
     </md-card-title>
-    <md-card-subtitle>{{subtitle}}</md-card-subtitle>
+    <md-card-subtitle itemprop="description">{{subtitle}}</md-card-subtitle>
   </md-card-header>
   <md-card-content>
-    <table class="width80">
-      <tr>
-        <td>
-          <md-input-container class="full-width">
-            <input mdInput type="text" placeholder="YouTube video url" [(ngModel)]="youtubeUrl" [disabled]="inProcess" />
-          </md-input-container>
-        </td>
-        <td>
-          <button md-raised-button (click)="getLinksButtonOnClick()" [disabled]="inProcess" class="getlinks-button"><md-icon>link</md-icon> Get Links</button>
-        </td>
-      </tr>
-    </table>
-    <hr *ngIf="youtubeLinksModel.length > 0 || errorMessage != ''" />
-    <table class="table" *ngIf="youtubeLinksModel.length > 0">
-      <thead>
-        <tr>
-          <td colspan="100" class="text-center">{{PageTitle}} </td>
-        </tr>
-        <tr>
-          <td>#</td>
-          <td>Title</td>
-          <td>Format Code</td>
-          <td>Audio Format</td>
-          <td>File Extension</td>
-          <td>Is3D</td>
-          <td>Is Adaptive</td>
-          <td>Is Encrypted</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of youtubeLinksModel; let myIndex = index">
-          <td>{{ myIndex + 1 }}</td>
-          <td>
-            <md-radio-button name="selectTypeRadio" (change)="selectRadioButtonOnChange($event, item)" [disabled]="inProcess">
-              {{ item.Resolution <= 0 ? 'Sound' : item.Resolution + 'p' }}
-            </md-radio-button>
-          </td>
-          <td>{{ item.FormatCode }}</td>
-          <td>{{ item.AudioFormat }}</td>
-          <td>{{ item.FileExtension }}</td>
-          <td>{{ item.Is3D }}</td>
-          <td>{{ item.IsAdaptive }}</td>
-          <td>{{ item.IsEncrypted }}</td>
-        </tr>
-      </tbody>
-      <tfoot *ngIf="selectedDownloadModel != null && !inProcess">
-        <tr *ngIf="downloadUrl == ''">
-          <td colspan="100" class="text-center">
-            <button md-raised-button (click)="downloadButtonOnClick()" class="getdownloadlinks-button"><md-icon>file_download</md-icon> Download</button>
-          </td>
-        </tr>
-        <tr *ngIf="downloadUrl != ''">
-          <td colspan="100" class="text-center">
-            <h3 class="text-blue">Your download will start, or you can download it by click <a [href]="downloadUrl">here</a>, It's valid until next 6 hours.</h3>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-    <div class="please-wait" *ngIf="inProcess">
-      <md-spinner></md-spinner>
-      <span class="text-muted">Your movie is downloading, It depend's on your movie volume.</span>
+    <div class="row">
+      <div class="col-sm-10">
+        <md-input-container class="full-width">
+          <input mdInput type="text" placeholder="Youtube url" [(ngModel)]="youtubeUrl" [disabled]="inProcess" />
+        </md-input-container>
+      </div>
+      <div class="col-sm-2">
+        <button md-raised-button (click)="getLinksButtonOnClick()" [disabled]="inProcess"><md-icon>link</md-icon> Get Links</button>
+      </div>
     </div>
-    <div class="text-danger" *ngIf="errorMessage != ''" [innerHTML]="errorMessage"></div>
+    <hr *ngIf="youtubeVideoInfoModel != null || errorMessage != ''" />
+    <div class="row" *ngIf="youtubeVideoInfoModel != null">
+      <div class="col-sm-4">
+        <img class="img-responsive img-thumbnail" [src]="youtubeVideoInfoModel.ImageThumbnailUrl" [alt]="youtubeVideoInfoModel.Title">
+        <ul class="list-group">
+          <li class="list-group-item">Title: <b>{{youtubeVideoInfoModel.Title}}</b></li>
+          <li class="list-group-item">Duration: <b>{{youtubeVideoInfoModel.Duration}}</b></li>
+          <li class="list-group-item">Rate: <b>{{youtubeVideoInfoModel.AverageRating}}</b>
+            <md-icon class="text-gray">star_rate</md-icon>
+          </li>
+          <li class="list-group-item">View: <b>{{youtubeVideoInfoModel.ViewCount}}</b>
+            <md-icon class="text-gray">visibility</md-icon>
+          </li>
+          <li class="list-group-item">Like: <b>{{youtubeVideoInfoModel.LikeCount}}</b>
+            <md-icon class="text-gray">sentiment_satisfied</md-icon>
+          </li>
+          <li class="list-group-item">Dislike: <b>{{youtubeVideoInfoModel.DislikeCount}}</b>
+            <md-icon class="text-gray">sentiment_dissatisfied</md-icon>
+          </li>
+        </ul>
+      </div>
+      <div class="col-sm-8">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th colspan="100">Videos</th>
+              </tr>
+              <tr>
+                <th>#</th>
+                <th>Quality</th>
+                <th>Resolution</th>
+                <th>Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of youtubeVideoInfoModel.VideoStreams; let myIndex = index" class="cursor-pointer" (click)="streamRowOnClick(item)">
+                <td>{{ myIndex + 1 }}</td>
+                <td>
+                  <md-radio-button name="selectTypeRadio" [checked]="item.Itag == selectedStreamToDownload.Itag" (focus)="item.Itag == selectedStreamToDownload.Itag"
+                    (change)="selectRadioButtonOnChange($event, item)" [disabled]="inProcess">
+                    {{ item.VideoQuality }}
+                  </md-radio-button>
+                </td>
+                <td>{{ item.Resolution }}</td>
+                <td>{{ item.Size }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th colspan="100">Audios</th>
+              </tr>
+              <tr>
+                <th>#</th>
+                <th>Quality</th>
+                <th>Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of youtubeVideoInfoModel.AudioStreams; let myIndex = index" class="cursor-pointer" (click)="streamRowOnClick(item)">
+                <td>{{ myIndex + 1 }}</td>
+                <td>
+                  <md-radio-button name="selectTypeRadio" [checked]="item.Itag == selectedStreamToDownload.Itag" (focus)="item.Itag == selectedStreamToDownload.Itag"
+                    (change)="selectRadioButtonOnChange($event, item)" [disabled]="inProcess">
+                    {{ item.Bitrate }}
+                  </md-radio-button>
+                </td>
+                <td>{{ item.Size }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="row" *ngIf="selectedStreamToDownload.Itag > 0 && !inProcess">
+          <div class="col-sm-12 text-center">
+            <button md-raised-button (click)="downloadButtonOnClick()" class="btn-primary"><md-icon>file_download</md-icon> Download</button>
+          </div>
+        </div>
+        <div class="row" *ngIf="downloadUrl != ''">
+          <div class="col-sm-12">
+            <h3 class="text-blue">Your download will start, or you can download it by click <a [href]="downloadUrl">here</a>, It's valid until
+              next 6 hours.</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="center-block text-center" *ngIf="inProcess">
+        <md-spinner class="center-block"></md-spinner>
+        <span class="text-muted">Your movie is downloading, It depend's on your movie volume.</span>
+      </div>
+    </div>
+    <div class="alert alert-danger" role="alert" *ngIf="errorMessage != ''" [innerHTML]="errorMessage">></div>
+    <div class="row hidden">
+      <div class="col-sm-6">
+        <star-rating-comp [starType]="'svg'" [rating]="5" [labelText]="'Please rate us:'" [labelVisible]="true" [disabled]="false"
+          [numOfStars]="5" [hoverEnabled]="true" [speed]="'immediately'">
+        </star-rating-comp>
+      </div>
+      <div class="col-sm-6">
+        <button md-raised-button type="button">Submit</button>
+      </div>
+    </div>
   </md-card-content>
 </md-card>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { YoutubeLinkModel, AdaptiveKindEnum, WebSitesEnum, AudioFormatEnum, VideoFormatEnum } from './youtube-links-models';
+import { YoutubeVideoInfoModel } from './youtube-links-models';
 import { Http, Jsonp, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
@@ -13,12 +13,13 @@ export class YoutubeLinksService {
   private webApiGetLinksUrl = "/api/YouTube/GetLinks/";
   private webApiDownloadVideoUrl = "/api/YouTube/DownloadVideo/";
 
-  getDownloadLinks(youtubeVideoUrl: string, youtubeLinkModel: YoutubeLinkModel): Observable<Response> {
+  getDownloadLinks(youtubeVideoUrl: string, isAudio: boolean, itag: number): Observable<Response> {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
     let youtubeDownloadModel = {
       VideoUrl: youtubeVideoUrl,
-      FormatCode: youtubeLinkModel.FormatCode
+      Itag: itag,
+      IsAudio: isAudio
     };
     return this.http.post(this.webApiDownloadVideoUrl, youtubeDownloadModel, options)
       .map(response => {
@@ -33,25 +34,14 @@ export class YoutubeLinksService {
     return this.http.post(this.webApiGetLinksUrl, { VideoUrl: youtubeVideoUrl }, options)
       .map(response => {
         let responseBody = response.json();
-        let links = responseBody.map((input) => {
-          return {
-            AdaptiveKind: AdaptiveKindEnum[input.AdaptiveKind],
-            AudioBitrate: input.AudioBitrate,
-            AudioFormat: AudioFormatEnum[input.AudioFormat],
-            FileExtension: input.FileExtension,
-            Format: VideoFormatEnum[input.Format],
-            FormatCode: input.FormatCode,
-            FullName: input.FullName,
-            Is3D: input.Is3D,
-            IsAdaptive: input.IsAdaptive,
-            IsEncrypted: input.IsEncrypted,
-            Resolution: input.Resolution,
-            Title: input.Title,
-            Uri: input.Uri,
-            WebSite: WebSitesEnum[input.WebSite]
+        let youtubeVideoInfoModel = new YoutubeVideoInfoModel();
+        for (var key in responseBody) {
+            if (responseBody.hasOwnProperty(key)) {
+              youtubeVideoInfoModel[key] = responseBody[key];
+            }
           }
-        });
-        return links;
+        //responseBody.map((inputObject) => {        });
+        return youtubeVideoInfoModel;
       })
       .catch(this.handleError);
   }

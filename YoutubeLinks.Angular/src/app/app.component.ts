@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { YoutubeLinkModel } from './youtube-links-models';
+import { YoutubeVideoInfoModel, SelectedStreamToDownload, YoutubeVideoStreamModel, YoutubeAudioStreamModel } from './youtube-links-models';
 import { YoutubeLinksService } from './youtube-links.service';
 import { WindowService } from './window.service';
 import { MdRadioButton } from '@angular/material';
-
 
 @Component({
   selector: 'app-root',
@@ -12,50 +11,52 @@ import { MdRadioButton } from '@angular/material';
 })
 export class AppComponent {
 
-  title = 'Get YouTube Direct Download Links';
-  subtitle = 'By 2Tera.com';
+  title = 'Get Youtube Direct Download Links';
+  subtitle = 'To download from youtube.com directly, without any limitations.';
   youtubeUrl = '';
-  //youtubeUrl = 'https://www.youtube.com/watch?v=W-jPAOonCOc';
 
   downloadUrl = '';
   errorMessage = '';
   inProcess = false;
-  youtubeLinksModel: YoutubeLinkModel[] = [];
-  selectedDownloadModel: YoutubeLinkModel = null;
+  youtubeVideoInfoModel: YoutubeVideoInfoModel = null;
+  selectedStreamToDownload: SelectedStreamToDownload = null;
 
-  constructor(private youtubeService: YoutubeLinksService, private windowService: WindowService) { }
-
-  public get PageTitle() : string {
-    return this.youtubeLinksModel.length <= 0 ? '' : this.youtubeLinksModel[0].Title;
+  constructor(private youtubeService: YoutubeLinksService, private windowService: WindowService) {
+    this.resetSelectedStreamToDownload();
   }
-  
+
+  streamRowOnClick(selectedStreamModel: YoutubeVideoStreamModel | YoutubeAudioStreamModel): void {
+    this.selectedStreamToDownload = {
+      Itag: selectedStreamModel.Itag,
+      IsAudio: selectedStreamModel['VideoQuality'] == undefined
+    }
+  }
 
   getLinksButtonOnClick(): void {
+    if (this.youtubeUrl == '') return;
     this.errorMessage = '';
     this.inProcess = true;
-    this.youtubeLinksModel = [];
-    this.selectedDownloadModel = null;
-    //this.youtubePageModel = null;
+    this.youtubeVideoInfoModel = null;
     this.downloadUrl = '';
-    if (this.youtubeUrl == '') return;
+    this.resetSelectedStreamToDownload();
     this.youtubeService.getLinks(this.youtubeUrl)
       .subscribe(
-      (response: any) => { 
-        this.youtubeLinksModel = response; 
+      (response: any) => {
+        this.youtubeVideoInfoModel = response;
       },
       (errorMessage: any) => {
         this.errorMessage = errorMessage;
         this.inProcess = false;
       },
-      () => { 
-        this.inProcess = false; 
+      () => {
+        this.inProcess = false;
       });
   }
 
   downloadButtonOnClick(): void {
     this.errorMessage = '';
     this.inProcess = true;
-    this.youtubeService.getDownloadLinks(this.youtubeUrl, this.selectedDownloadModel)
+    this.youtubeService.getDownloadLinks(this.youtubeUrl, this.selectedStreamToDownload.IsAudio, this.selectedStreamToDownload.Itag)
       .subscribe(
       (response: any) => {
         let window = this.windowService.nativeWindow;
@@ -64,19 +65,28 @@ export class AppComponent {
         window.location = this.downloadUrl;
       },
       (errorMessage: any) => {
-        this.selectedDownloadModel = null;
+        this.resetSelectedStreamToDownload();
         this.errorMessage = errorMessage;
         this.inProcess = false;
       },
       () => {
         this.inProcess = false;
       });
-      
   }
 
-  selectRadioButtonOnChange(event: any, selectedLinkModel: YoutubeLinkModel): void {
+  selectRadioButtonOnChange(event: any, selectedStreamModel: YoutubeVideoStreamModel | YoutubeAudioStreamModel): void {
     let radioButton: MdRadioButton = event.source;
     if (!radioButton.checked) return;
-    this.selectedDownloadModel = selectedLinkModel;
+    this.selectedStreamToDownload = {
+      Itag: selectedStreamModel.Itag,
+      IsAudio: selectedStreamModel['VideoQuality'] != undefined
+    }
+  }
+
+  private resetSelectedStreamToDownload(): void {
+    this.selectedStreamToDownload = {
+      Itag: 0,
+      IsAudio: false
+    };
   }
 }

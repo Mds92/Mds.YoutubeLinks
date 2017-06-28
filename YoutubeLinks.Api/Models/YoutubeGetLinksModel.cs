@@ -5,17 +5,14 @@ namespace YoutubeLinks.Api.Models
 {
     public class YoutubeDownloadModel
     {
-        /// <summary>
-        /// آدرس صفحه فیلم در یوتیوب
-        /// </summary>
+        [Required]
+        public bool IsAudio { get; set; }
+
+        [Required]
+        public int Itag { get; set; }
+
         [Required]
         public string VideoUrl { get; set; }
-
-        /// <summary>
-        /// آدرس لینک دانلود 
-        /// </summary>
-        [Required]
-        public int FormatCode { get; set; }
     }
 
     public class YoutubeGetLinksModel
@@ -24,32 +21,32 @@ namespace YoutubeLinks.Api.Models
         public string VideoUrl { get; set; }
     }
 
-    internal class YoutubeVideoInternalModel
+    public class YoutubeVideoInfoModel
     {
-        public string itag { get; set; }
-        public string quality { get; set; }
-        public string type { get; set; }
-        public string url { get; set; }
-    }
-
-    public class YoutubeLinkModel
-    {
-        public string ITag { get; set; }
+        public string Id { get; set; }
         public string Title { get; set; }
-        public string Quality { get; set; }
-        public string Type { get; set; }
-        public string DownloadUrl { get; set; }
+        public double AverageRating { get; set; }
+        public string Description{ get; set; }
+        public string Duration{ get; set; }
+        public string ImageThumbnailUrl { get; set; }
+        public string LikeCount { get; set; }
+        public string DislikeCount { get; set; }
+        public string ViewCount { get; set; }
+        public List<YoutubeVideoStreamModel> VideoStreams { get; set; }
+        public List<YoutubeAudioStreamModel> AudioStreams { get; set; }
     }
-
-    public class YoutubeVideoPageModel
+    public class YoutubeVideoStreamModel
     {
-        public YoutubeVideoPageModel()
-        {
-            Links = new List<YoutubeLinkModel>();
-        }
-
-        public string PageTitle { get; set; }
-        public List<YoutubeLinkModel> Links { get; set; }
+        public int Itag { get; set; }
+        public long Bitrate { get; set; }
+        public string Resolution { get; set; }
+        public string VideoQuality { get; set; }
+        public string Size { get; set; }
     }
-
+    public class YoutubeAudioStreamModel
+    {
+        public int Itag { get; set; }
+        public long Bitrate { get; set; }
+        public string Size { get; set; }
+    }
 }

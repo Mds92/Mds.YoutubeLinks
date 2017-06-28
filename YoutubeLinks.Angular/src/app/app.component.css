@@ -1,31 +1,6 @@
 
-.container {
-    margin: 0 auto;
-}
-
 .bg-gray{
     background: #f7f7f7;
-}
-
-.text-danger{
-    color: red;
-}
-
-.text-blue{
-    color: #65b7d2;
-}
-
-.text-center{
-    text-align: center;
-}
-
-.text-muted{
-    opacity: 0.5;
-}
-
-.center-block{
-    display: block;
-    margin: 0 auto;
 }
 
 md-card-content{
@@ -41,49 +16,9 @@ md-card-content{
     margin: 0 auto;
 }
 
-.table {
-    width: 80%;
-    margin: 0 auto;
-    border: 1px solid #ccc;
-}
-
-.table td, .table th{
-    font-size: 14px;
-}
-
-.table>thead {
-    background: #ccc;
-    font-weight: bold;
-}
-
-.table>tbody tr td{
-    border-top: solid 1px #ccc;
-}
-
-.table>tbody tr:nth-child(even){
-    background: #f7f7f7;
-}
-.table>tfoot {
-    padding: 10px;
-}
-
 .please-wait{
     margin: 0 auto;
     width: 100%;
     text-align: center;
-    font-size: 18px;
-}
-
-.please-wait md-spinner{
-    margin: 0 auto;
-}
-
-.getlinks-button,
-.getdownloadlinks-button{
-    font-size: 20px;
-    padding: 15px;
-}
-
-input[type="text"]{
     font-size: 18px;
 }

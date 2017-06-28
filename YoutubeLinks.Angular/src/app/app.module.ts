@@ -6,6 +6,7 @@ import { WindowService } from './window.service';
 import { MdInputModule, MdGridListModule, MdButtonModule, MdProgressSpinnerModule, MdCardModule, MdIconModule, MdRadioModule } from '@angular/material';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
+import { StarRatingModule } from 'angular-star-rating';
 import 'hammerjs';
 
 import { AppComponent } from './app.component';
@@ -16,7 +17,8 @@ import { AppComponent } from './app.component';
   ],
   imports: [
     BrowserModule, BrowserAnimationsModule, FormsModule, HttpModule,
-    MdInputModule, MdGridListModule, MdButtonModule, MdProgressSpinnerModule, MdCardModule, MdIconModule, MdRadioModule
+    MdInputModule, MdGridListModule, MdButtonModule, MdProgressSpinnerModule, MdCardModule, MdIconModule, MdRadioModule,
+    StarRatingModule
   ],
   providers: [YoutubeLinksService, WindowService],
   bootstrap: [AppComponent]

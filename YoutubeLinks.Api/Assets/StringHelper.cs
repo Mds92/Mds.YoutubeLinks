@@ -47,6 +47,16 @@ namespace YoutubeLinks.Api
                 .Replace("۸", "8")
                 .Replace("۹", "9");
         }
+        public static string ToMoneyFormat(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str)) return string.Empty;
+            str = str.Trim().Replace(" ", "").ToEnglishNumber();
+            if (string.IsNullOrWhiteSpace(str)) return "";
+            var output = $"{double.Parse(str):#,0.####}";
+            if (output.Contains("-"))
+                output = output.Replace("-", "") + "-";
+            return output;
+        }
 
         public static string FirstCharToUpper(this string inputString)
         {

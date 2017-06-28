@@ -1,41 +1,29 @@
-export class YoutubeLinkModel {
-    AdaptiveKind: AdaptiveKindEnum;
-    AudioBitrate: number;
-    AudioFormat: AudioFormatEnum;
-    FileExtension: string;
-    Format: VideoFormatEnum;
-    FormatCode: number;
-    FullName: string;
-    Is3D: boolean;
-    IsAdaptive: boolean;
-    IsEncrypted: boolean;
-    Resolution: number;
+export class YoutubeVideoInfoModel {
+    Id: string;
     Title: string;
-    Uri: string;
-    WebSite: WebSitesEnum;
+    AverageRating: number;
+    Description: string;
+    Duration: string;
+    ImageThumbnailUrl: string;
+    LikeCount: string;
+    DislikeCount: string;
+    ViewCount: string;
+    VideoStreams: YoutubeVideoStreamModel[];
+    AudioStreams: YoutubeAudioStreamModel[];
 }
-
-export enum WebSitesEnum {
-    YouTube = 0
+export class YoutubeVideoStreamModel {
+    Itag: number;
+    Bitrate: number;
+    Resolution: string;
+    VideoQuality: string;
+    Size: string;
 }
-
-export enum AdaptiveKindEnum {
-    None = 0,
-    Audio = 1,
-    Video = 2
+export class YoutubeAudioStreamModel {
+    Itag: number;
+    Bitrate: number;
+    Size: string;
 }
-
-export enum AudioFormatEnum {
-    Mp3 = 0,
-    Aac = 1,
-    Vorbis = 2,
-    Unknown = 3
-}
-
-export enum VideoFormatEnum {
-    Flash = 0,
-    Mobile = 1,
-    Mp4 = 2,
-    WebM = 3,
-    Unknown = 4
+export class SelectedStreamToDownload {
+    Itag: number;
+    IsAudio: boolean;
 }
