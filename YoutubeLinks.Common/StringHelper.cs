@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace YoutubeLinks.Api
+namespace YoutubeLinks.Common
 {
     public static class StringHelper
     {
@@ -14,7 +15,7 @@ namespace YoutubeLinks.Api
         public static string ToPersianNumber(this double? input)
         {
             if (!input.HasValue) return string.Empty;
-            var inputAsString = input.Value.ToString();
+            var inputAsString = input.Value.ToString(CultureInfo.InvariantCulture);
             if (string.IsNullOrEmpty(inputAsString)) return "";
 
             //۰ ۱ ۲ ۳ ۴ ۵ ۶ ۷ ۸ ۹

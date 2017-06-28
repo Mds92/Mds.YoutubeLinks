@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Configuration;
 
-namespace YoutubeLinks.Api
+namespace YoutubeLinks.Common
 {
     public class ConfigurationHelper
     {

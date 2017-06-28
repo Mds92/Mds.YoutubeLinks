@@ -11,7 +11,7 @@ import { MdRadioButton } from '@angular/material';
 })
 export class AppComponent {
 
-  title = 'Get Youtube Direct Download Links';
+  title = 'Get Youtube Direct Download Links; Free and Fast';
   subtitle = 'To download from youtube.com directly, without any limitations.';
   youtubeUrl = '';
 
