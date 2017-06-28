@@ -48,6 +48,14 @@ namespace YoutubeLinks.Api.Controllers
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
             var videoInfo = await GetVideoInfo(model.VideoUrl);
+            var newImageHighResUrl = "";
+            if (!string.IsNullOrWhiteSpace(videoInfo.ImageHighResUrl))
+            {
+                var destinationDirectory = ZlpPathHelper.Combine(HttpRuntime.AppDomainAppPath, "DownloadTemp");
+                var thumbnailFilePath = ZlpPathHelper.Combine(destinationDirectory, $"{Guid.NewGuid()}{ZlpPathHelper.GetExtension(videoInfo.ImageHighResUrl)}");
+                Aria2Downloader.DownloadFile(videoInfo.ImageHighResUrl, thumbnailFilePath, "", 0, message => { Trace.Write(message); });
+                newImageHighResUrl = $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(thumbnailFilePath)}";
+            }
             var youtubeVideoInfoModel = new YoutubeVideoInfoModel
             {
                 Id = videoInfo.Id,
@@ -58,7 +66,7 @@ namespace YoutubeLinks.Api.Controllers
                 Description = videoInfo.Description,
                 DislikeCount = videoInfo.DislikeCount.ToString().ToMoneyFormat(),
                 Duration = $"{videoInfo.Duration.Hours:00}:{videoInfo.Duration.Minutes:00}:{videoInfo.Duration.Seconds:00}",
-                ImageThumbnailUrl = videoInfo.ImageHighResUrl,
+                ImageThumbnailUrl = newImageHighResUrl,
                 LikeCount = videoInfo.LikeCount.ToString().ToMoneyFormat(),
                 ViewCount = videoInfo.ViewCount.ToString().ToMoneyFormat()
             };

@@ -75,7 +75,7 @@ namespace YoutubeLinksWindowsService
 
         private void DeleteRedundantFiles(string folderPath)
         {
-            var before3HoursDateTime = DateTime.Now.AddHours(-3);
+            var before3HoursDateTime = DateTime.Now.AddHours(-CachedParams.HourNumber);
             var directoryInfo = new ZlpDirectoryInfo(folderPath);
             var fileInfoes = directoryInfo.GetFiles("*.*", SearchOption.AllDirectories);
             foreach (var zlpFileInfo in fileInfoes)
