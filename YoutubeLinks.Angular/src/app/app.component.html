@@ -92,9 +92,9 @@
             </tbody>
           </table>
         </div>
-        <div class="row" *ngIf="selectedStreamToDownload.Itag > 0 && !inProcess">
+        <div class="row" *ngIf="selectedStreamToDownload.Itag > 0 && !inProcess && downloadUrl == ''">
           <div class="col-sm-12 text-center">
-            <button md-raised-button (click)="downloadButtonOnClick()" class="btn-primary"><md-icon>file_download</md-icon> Download</button>
+            <button md-raised-button (click)="downloadButtonOnClick()" class="btn-primary"><md-icon>file_download</md-icon> Download </button>
           </div>
         </div>
         <div class="row" *ngIf="downloadUrl != ''">

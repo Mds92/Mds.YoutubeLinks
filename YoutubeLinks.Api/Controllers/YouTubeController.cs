@@ -6,10 +6,10 @@ using YoutubeLinks.Api.Models;
 using YoutubeLinks.Api.Filters;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoutubeExplode;
 using YoutubeExplode.Models;
+using YoutubeLinks.Common;
 using YoutubeExplode.Models.MediaStreams;
 using ZetaLongPaths;
 
@@ -48,6 +48,14 @@ namespace YoutubeLinks.Api.Controllers
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
             var videoInfo = await GetVideoInfo(model.VideoUrl);
+            var newImageHighResUrl = "";
+            if (!string.IsNullOrWhiteSpace(videoInfo.ImageHighResUrl))
+            {
+                var destinationDirectory = ZlpPathHelper.Combine(HttpRuntime.AppDomainAppPath, "DownloadTemp");
+                var thumbnailFilePath = ZlpPathHelper.Combine(destinationDirectory, $"{Guid.NewGuid()}{ZlpPathHelper.GetExtension(videoInfo.ImageHighResUrl)}");
+                Aria2Downloader.DownloadFile(videoInfo.ImageHighResUrl, thumbnailFilePath, "", 0, message => { Trace.Write(message); });
+                newImageHighResUrl = $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(thumbnailFilePath)}";
+            }
             var youtubeVideoInfoModel = new YoutubeVideoInfoModel
             {
                 Id = videoInfo.Id,
@@ -58,7 +66,7 @@ namespace YoutubeLinks.Api.Controllers
                 Description = videoInfo.Description,
                 DislikeCount = videoInfo.DislikeCount.ToString().ToMoneyFormat(),
                 Duration = $"{videoInfo.Duration.Hours:00}:{videoInfo.Duration.Minutes:00}:{videoInfo.Duration.Seconds:00}",
-                ImageThumbnailUrl = videoInfo.ImageHighResUrl,
+                ImageThumbnailUrl = newImageHighResUrl,
                 LikeCount = videoInfo.LikeCount.ToString().ToMoneyFormat(),
                 ViewCount = videoInfo.ViewCount.ToString().ToMoneyFormat()
             };
@@ -121,12 +129,7 @@ namespace YoutubeLinks.Api.Controllers
             if (ZlpIOHelper.FileExists(finalVideoFilePath))
                 return $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(finalVideoFilePath)}";
             var tasks = new List<Task>();
-            if (videoInfo.AudioStreams != null && videoInfo.AudioStreams.Count > 0)
-            {
-                audioStreamInfo = videoInfo.AudioStreams.OrderByDescending(q => q.Bitrate).FirstOrDefault(q => q.Container == Container.M4A || q.Container == Container.Mp4);
-                if (audioStreamInfo == null)
-                    throw new Exception("Selected video not found");
-            }
+            audioStreamInfo = videoInfo.AudioStreams.OrderByDescending(q => q.Bitrate).FirstOrDefault(q => q.Container == Container.M4A || q.Container == Container.Mp4);
             tasks.Add(Task.Run(() =>
             {
                 Aria2Downloader.DownloadFile(videoStreamInfo.Url, videoTempFilePath, proxy, 0, message => { Trace.Write(message); });

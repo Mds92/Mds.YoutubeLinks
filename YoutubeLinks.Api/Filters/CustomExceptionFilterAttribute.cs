@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Web.Http.Filters;
 using Newtonsoft.Json;
+using YoutubeLinks.Common;
 
 namespace YoutubeLinks.Api.Filters
 {
@@ -13,22 +14,16 @@ namespace YoutubeLinks.Api.Filters
         public override void OnException(HttpActionExecutedContext context)
         {
             var exception = context.Exception;
-            var exceptionMessage = exception.Message;
-            exception = exception.InnerException;
-            while (exception != null)
-            {
-                exceptionMessage += $"InnerException: {exception.Message}";
-                exception = exception.InnerException;
-            }
+            var exceptionMessage = exception.GetExceptionMessages();
             context.Response = new HttpResponseMessage
             {
                 Content = new StringContent(
                     JsonConvert.SerializeObject(new
                     {
                         ErrorMessage = exceptionMessage
-                    }), 
+                    }),
                     Encoding.UTF8, "application/json"),
-                    StatusCode = HttpStatusCode.InternalServerError
+                StatusCode = HttpStatusCode.InternalServerError
             };
         }
     }
