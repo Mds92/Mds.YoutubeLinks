@@ -12,6 +12,20 @@ export class YoutubeLinksService {
 
   private webApiGetLinksUrl = "/api/YouTube/GetLinks/";
   private webApiDownloadVideoUrl = "/api/YouTube/DownloadVideo/";
+  private webApiSubmitRateUrl = "/api/YouTube/SubmitRate/";
+
+  submitRate(rateValue: number): Observable<Response> {
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({ headers: headers });
+    let model = {
+      RateValue: rateValue
+    };
+    return this.http.post(this.webApiSubmitRateUrl, model, options)
+      .map(response => {
+        return response.json();
+      })
+      .catch(this.handleError);
+  }
 
   getDownloadLinks(youtubeVideoUrl: string, isAudio: boolean, itag: number): Observable<Response> {
     let headers = new Headers({ 'Content-Type': 'application/json' });

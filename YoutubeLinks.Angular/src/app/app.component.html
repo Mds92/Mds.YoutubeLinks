@@ -9,7 +9,8 @@
     <div class="row">
       <div class="col-sm-10">
         <md-input-container class="full-width">
-          <input mdInput type="text" placeholder="Youtube url" [(ngModel)]="youtubeUrl" [disabled]="inProcess" />
+          <input mdInput type="text" placeholder="Youtube video url" [(ngModel)]="youtubeUrl" [disabled]="inProcess" (click)="$event.target.select()"
+          />
         </md-input-container>
       </div>
       <div class="col-sm-2">
@@ -97,10 +98,10 @@
             <button md-raised-button (click)="downloadButtonOnClick()" class="btn-primary"><md-icon>file_download</md-icon> Download </button>
           </div>
         </div>
-        <hr *ngIf="downloadUrl != ''"/>
+        <hr *ngIf="downloadUrl != ''" />
         <div class="alert alert-success" role="alert" *ngIf="downloadUrl != ''">
-          <h4 class="text-success">Your download will start, or you can download it by click <a [href]="downloadUrl">here</a>.<br> 
-          <span class="text-danger">It's valid until next 3 hours.</span></h4>
+          <h4 class="text-success">Your download will start, or you can download it by click <a [href]="downloadUrl">here</a>.<br>
+            <span class="text-danger">It's valid until next 3 hours.</span></h4>
         </div>
       </div>
     </div>
@@ -110,16 +111,23 @@
         <span class="text-muted">Your movie is downloading, It depend's on your movie volume.</span>
       </div>
     </div>
-    <div class="alert alert-danger" role="alert" *ngIf="errorMessage != ''" [innerHTML]="errorMessage">></div>
-    <div class="row hidden">
-      <div class="col-sm-6">
-        <star-rating-comp [starType]="'svg'" [rating]="5" [labelText]="'Please rate us:'" [labelVisible]="true" [disabled]="false"
-          [numOfStars]="5" [hoverEnabled]="true" [speed]="'immediately'">
+    <hr *ngIf="youtubeVideoInfoModel != null"/>
+    <div class="row" *ngIf="!rateSubmitted && youtubeVideoInfoModel != null">
+      <div class="col-sm-3"></div>
+      <div class="col-sm-5">
+        <star-rating-comp [starType]="'svg'" [rating]="5" [labelText]="'Please rate us:'" [labelVisible]="true" [disabled]="rateSubmitting"
+          [numOfStars]="5" [hoverEnabled]="true" [speed]="'immediately'" [size]="'large'" (onRatingChange)="onRatingChange($event)">
         </star-rating-comp>
       </div>
-      <div class="col-sm-6">
-        <button md-raised-button type="button">Submit</button>
+      <div class="col-sm-4">
+        <button md-raised-button type="button" (click)="submitRateButtonOnClick()" [disabled]="rateSubmitting">Submit <span class="text-primary text-bold">{{rateValue}}</span></button>
       </div>
     </div>
+    <div class="row" *ngIf="rateSubmitted && youtubeVideoInfoModel != null">
+      <div class="col-sm-12 text-center">
+        <h4>Thanks for rating</h4>
+      </div>
+    </div>
+    <div class="alert alert-danger" role="alert" *ngIf="errorMessage != ''" [innerHTML]="errorMessage">></div>
   </md-card-content>
 </md-card>

@@ -1,15 +1,28 @@
 /* You can add global styles to this file, and also import other style files */
-html{    
-    margin: 10px;
-}
-
 html, body{    
+    margin: 0;
+    padding: 0;
     font-family: 'Segoe UI', Tahoma;
     font-size: 14px;
 }
 
+body{
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
 .cursor-pointer{
     cursor: pointer;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 10px;
+    font-size: 12px;
+    background: #f5f5f5;
+    min-height: 30px;
 }
 
 @import '~@angular/material/prebuilt-themes/indigo-pink.css';

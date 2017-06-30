@@ -6,11 +6,13 @@ using YoutubeLinks.Api.Models;
 using YoutubeLinks.Api.Filters;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using YoutubeExplode;
 using YoutubeExplode.Models;
 using YoutubeLinks.Common;
 using YoutubeExplode.Models.MediaStreams;
+using YoutubeLinks.Data;
 using ZetaLongPaths;
 
 namespace YoutubeLinks.Api.Controllers
@@ -45,6 +47,111 @@ namespace YoutubeLinks.Api.Controllers
         {
             return $"/DownloadTemp/{fileName}";
         }
+        private static YoutubeVideoInfoModel GetDummyYoutubeVideoInfoModel()
+        {
+            return new YoutubeVideoInfoModel
+            {
+                Id = "1231231",
+                AverageRating = 4.75,
+                Description = "This is footage that we captured while in Costa Rica at 5K 60FPS. All 4K content is available for commercial licensing upon",
+                DislikeCount = "7,306",
+                LikeCount = "107,719",
+                Title = "COSTA RICA IN 4K 60fps (ULTRA HD) w/ Freefly Movi",
+                Duration = "00:05:09",
+                ImageThumbnailUrl = "https://dummyimage.com/600x400/000/fff",
+                ViewCount = "55,734,114",
+                VideoStreams = new List<YoutubeVideoStreamModel>
+                {
+                    new YoutubeVideoStreamModel
+                    {
+                        Resolution = "3840×2160",
+                        VideoQuality = "4320p",
+                        Itag = 1,
+                        Bitrate = 4320,
+                        Size = "573.8 MB"
+                    },
+                    new YoutubeVideoStreamModel
+                    {
+                        Resolution = "3840×2160",
+                        VideoQuality = "2160p",
+                        Itag = 2,
+                        Bitrate = 2160,
+                        Size = "669.9 MB"
+                    },
+                    new YoutubeVideoStreamModel
+                    {
+                        Resolution = "2560×1440",
+                        VideoQuality = "1440p",
+                        Itag = 3,
+                        Bitrate = 1440,
+                        Size = "473.5 MB"
+                    },
+                    new YoutubeVideoStreamModel
+                    {
+                        Resolution = "1920×1080",
+                        VideoQuality = "1080p",
+                        Itag = 4,
+                        Bitrate = 1080,
+                        Size = "102.2 MB"
+                    },
+                    new YoutubeVideoStreamModel
+                    {
+                        Resolution = "1280×720",
+                        VideoQuality = "720p",
+                        Itag = 5,
+                        Bitrate = 1080,
+                        Size = "55.1 MB"
+                    },
+                    new YoutubeVideoStreamModel
+                    {
+                        Resolution = "854×480",
+                        VideoQuality = "480p",
+                        Itag = 6,
+                        Bitrate = 480,
+                        Size = "28.4 MB"
+                    },
+                    new YoutubeVideoStreamModel
+                    {
+                        Resolution = "640×360",
+                        VideoQuality = "360p",
+                        Itag = 7,
+                        Bitrate = 360,
+                        Size = "14.5 MB"
+                    },
+                    new YoutubeVideoStreamModel
+                    {
+                        Resolution = "426×240",
+                        VideoQuality = "240p",
+                        Itag = 8,
+                        Bitrate = 240,
+                        Size = "8.3 MB"
+                    },
+                    new YoutubeVideoStreamModel
+                    {
+                        Resolution = "256×144",
+                        VideoQuality = "144p",
+                        Itag = 9,
+                        Bitrate = 144,
+                        Size = "3.8 MB"
+                    }
+                },
+                AudioStreams = new List<YoutubeAudioStreamModel>
+                {
+                    new YoutubeAudioStreamModel
+                    {
+                        Bitrate = 128128,
+                        Size = "4.7 MB",
+                        Itag = 1
+                    },
+                    new YoutubeAudioStreamModel
+                    {
+                        Bitrate = 48740,
+                        Size = "1.8 MB",
+                        Itag = 2
+                    }
+                }
+            };
+        }
         private static string GetProxy
         {
             get
@@ -68,6 +175,9 @@ namespace YoutubeLinks.Api.Controllers
         {
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
+#if DEBUG
+            return GetDummyYoutubeVideoInfoModel();
+#endif
             var videoInfo = await GetVideoInfo(model.VideoUrl);
             var newImageHighResUrl = "";
             if (!string.IsNullOrWhiteSpace(videoInfo.ImageHighResUrl))
@@ -118,10 +228,12 @@ namespace YoutubeLinks.Api.Controllers
         {
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
+#if DEBUG
+            return "/";
+#endif
             var videoInfo = await GetVideoInfo(model.VideoUrl);
             if (videoInfo == null)
                 throw new Exception("Selected video not found");
-
             AudioStreamInfo audioStreamInfo;
             var audioFilePath = "";
             if (model.IsAudio)
@@ -164,7 +276,27 @@ namespace YoutubeLinks.Api.Controllers
             }
             FFmpeg.MergeVideoAudio(videoTempFilePath, audioFilePath, finalVideoFilePath, message => { Trace.Write(message); });
             ZlpIOHelper.DeleteFile(videoTempFilePath);
-                return GetRelativeFilePath(ZlpPathHelper.GetFileNameFromFilePath(finalVideoFilePath));
+            return GetRelativeFilePath(ZlpPathHelper.GetFileNameFromFilePath(finalVideoFilePath));
+        }
+
+        [HttpPost]
+        public async Task SubmitRate(YoutubeRateModel model)
+        {
+            if (!ModelState.IsValid)
+                throw new Exception("Data is invalid");
+#if DEBUG
+            Thread.Sleep(5000);
+#endif
+            var rate = new Rate
+            {
+                Value = model.RateValue,
+                IP = HttpContext.Current.Request.UserHostAddress
+            };
+            using (var dbContext = new YoutubeLinksEntities())
+            {
+                dbContext.Rates.Add(rate);
+                await dbContext.SaveChangesAsync();
+            }
         }
     }
 }

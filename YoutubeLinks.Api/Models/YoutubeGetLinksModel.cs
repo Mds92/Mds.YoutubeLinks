@@ -21,6 +21,12 @@ namespace YoutubeLinks.Api.Models
         public string VideoUrl { get; set; }
     }
 
+    public class YoutubeRateModel
+    {
+        [Required]
+        public byte RateValue { get; set; }
+    }
+
     public class YoutubeVideoInfoModel
     {
         public string Id { get; set; }

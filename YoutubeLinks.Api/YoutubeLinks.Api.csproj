@@ -44,6 +44,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.5\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
@@ -118,6 +124,10 @@
     <ProjectReference Include="..\YoutubeLinks.Common\YoutubeLinks.Common.csproj">
       <Project>{1b5a3370-bb36-48a2-9039-3038fae3be4c}</Project>
       <Name>YoutubeLinks.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\YoutubeLinks.Data\YoutubeLinks.Data.csproj">
+      <Project>{dc4daf9b-47c7-48d6-8fea-91d0e9cc0213}</Project>
+      <Name>YoutubeLinks.Data</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

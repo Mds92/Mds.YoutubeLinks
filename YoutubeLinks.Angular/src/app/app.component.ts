@@ -18,6 +18,9 @@ export class AppComponent {
   downloadUrl = '';
   errorMessage = '';
   inProcess = false;
+  rateValue = 5;
+  rateSubmitting = false;
+  rateSubmitted = false;
   youtubeVideoInfoModel: YoutubeVideoInfoModel = null;
   selectedStreamToDownload: SelectedStreamToDownload = null;
 
@@ -81,6 +84,28 @@ export class AppComponent {
       Itag: selectedStreamModel.Itag,
       IsAudio: selectedStreamModel['VideoQuality'] != undefined
     }
+  }
+
+  onRatingChange(e: any): void {
+    this.rateValue = e.rating;
+  }
+
+  submitRateButtonOnClick(): void {
+    this.rateSubmitting = true;
+    this.youtubeService.submitRate(this.rateValue)
+      .subscribe(
+      (response: any) => {
+        this.rateSubmitted = true;
+        this.rateSubmitting = false;
+      },
+      (errorMessage: any) => {
+        this.rateSubmitted = false;
+        this.rateSubmitting = false;
+        this.errorMessage = errorMessage;
+      },
+      () => {
+        this.rateSubmitting = false;
+      });
   }
 
   private resetSelectedStreamToDownload(): void {
