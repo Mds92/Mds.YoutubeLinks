@@ -10,10 +10,12 @@ import { StarRatingModule } from 'angular-star-rating';
 import 'hammerjs';
 
 import { AppComponent } from './app.component';
+import { RateComponent } from './rate/rate.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    RateComponent
   ],
   imports: [
     BrowserModule, BrowserAnimationsModule, FormsModule, HttpModule,

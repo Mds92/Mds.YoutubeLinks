@@ -27,3 +27,8 @@ export class SelectedStreamToDownload {
     Itag: number;
     IsAudio: boolean;
 }
+
+export class YoutubeGetRateModel {
+    RateValue: number;
+    TotalRatesCount: number;
+}

@@ -280,7 +280,7 @@ namespace YoutubeLinks.Api.Controllers
         }
 
         [HttpPost]
-        public async Task SubmitRate(YoutubeRateModel model)
+        public async Task SubmitRate(YoutubeSubmitRateModel model)
         {
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
@@ -297,6 +297,18 @@ namespace YoutubeLinks.Api.Controllers
                 dbContext.Rates.Add(rate);
                 await dbContext.SaveChangesAsync();
             }
+        }
+
+        [HttpPost]
+        public async Task<YoutubeGetRateModel> GetRates()
+        {
+            var model = new YoutubeGetRateModel();
+#if DEBUG
+            Thread.Sleep(1000);
+            model.RateValue = 4.86f;
+            model.TotalRatesCount = 1213;
+#endif
+            return model;
         }
     }
 }

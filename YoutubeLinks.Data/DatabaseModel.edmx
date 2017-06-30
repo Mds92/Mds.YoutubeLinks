@@ -18,6 +18,7 @@ warning 6013: The table/view 'YoutubeLinks.dbo.RateAverageValueView' does not ha
         <EntityType Name="RateAverageValueView">
           <Property Name="Id" Type="uniqueidentifier" />
           <Property Name="AverageRateValue" Type="float" />
+          <Property Name="TotalRatesNumber" Type="int" />
         </EntityType>-->
         <EntityContainer Name="YoutubeLinksModelStoreContainer">
           <EntitySet Name="Rate" EntityType="Self.Rate" Schema="dbo" store:Type="Tables" />

@@ -21,10 +21,16 @@ namespace YoutubeLinks.Api.Models
         public string VideoUrl { get; set; }
     }
 
-    public class YoutubeRateModel
+    public class YoutubeSubmitRateModel
     {
         [Required]
         public byte RateValue { get; set; }
+    }
+
+    public class YoutubeGetRateModel
+    {
+        public float RateValue { get; set; }
+        public int TotalRatesCount { get; set; }
     }
 
     public class YoutubeVideoInfoModel
@@ -32,8 +38,8 @@ namespace YoutubeLinks.Api.Models
         public string Id { get; set; }
         public string Title { get; set; }
         public double AverageRating { get; set; }
-        public string Description{ get; set; }
-        public string Duration{ get; set; }
+        public string Description { get; set; }
+        public string Duration { get; set; }
         public string ImageThumbnailUrl { get; set; }
         public string LikeCount { get; set; }
         public string DislikeCount { get; set; }

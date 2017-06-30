@@ -11,6 +11,11 @@ body{
     margin-bottom: 30px;
 }
 
+html{
+    position: relative;
+    min-height: 100%;
+}
+
 .cursor-pointer{
     cursor: pointer;
 }

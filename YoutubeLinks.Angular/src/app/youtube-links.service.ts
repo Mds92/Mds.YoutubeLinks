@@ -13,6 +13,7 @@ export class YoutubeLinksService {
   private webApiGetLinksUrl = "/api/YouTube/GetLinks/";
   private webApiDownloadVideoUrl = "/api/YouTube/DownloadVideo/";
   private webApiSubmitRateUrl = "/api/YouTube/SubmitRate/";
+  private webApiGetRatesUrl = "/api/YouTube/GetRates/";
 
   submitRate(rateValue: number): Observable<Response> {
     let headers = new Headers({ 'Content-Type': 'application/json' });
@@ -21,6 +22,16 @@ export class YoutubeLinksService {
       RateValue: rateValue
     };
     return this.http.post(this.webApiSubmitRateUrl, model, options)
+      .map(response => {
+        return response.json();
+      })
+      .catch(this.handleError);
+  }
+
+  getRates(): Observable<Response> {
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({ headers: headers });
+    return this.http.post(this.webApiGetRatesUrl, {}, options)
       .map(response => {
         return response.json();
       })
