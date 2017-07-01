@@ -14,14 +14,24 @@
           <Property Name="Value" Type="tinyint" Nullable="false" />
         </EntityType>
         <!--Errors Found During Generation:
-warning 6013: The table/view 'YoutubeLinks.dbo.RateAverageValueView' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+warning 6002: The table/view 'YoutubeLinks.dbo.RateAverageValueView' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="RateAverageValueView">
-          <Property Name="Id" Type="uniqueidentifier" />
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
           <Property Name="AverageRateValue" Type="float" />
           <Property Name="TotalRatesNumber" Type="int" />
-        </EntityType>-->
+        </EntityType>
         <EntityContainer Name="YoutubeLinksModelStoreContainer">
           <EntitySet Name="Rate" EntityType="Self.Rate" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RateAverageValueView" EntityType="Self.RateAverageValueView" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [RateAverageValueView].[Id] AS [Id], 
+    [RateAverageValueView].[AverageRateValue] AS [AverageRateValue], 
+    [RateAverageValueView].[TotalRatesNumber] AS [TotalRatesNumber]
+    FROM [dbo].[RateAverageValueView] AS [RateAverageValueView]</DefiningQuery>
+          </EntitySet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -37,7 +47,16 @@ warning 6013: The table/view 'YoutubeLinks.dbo.RateAverageValueView' does not ha
         </EntityType>
         <EntityContainer Name="YoutubeLinksEntities" annotation:LazyLoadingEnabled="false">
           <EntitySet Name="Rates" EntityType="Self.Rate" />
+          <EntitySet Name="RateAverageValueViews" EntityType="YoutubeLinksModel.RateAverageValueView" />
         </EntityContainer>
+        <EntityType Name="RateAverageValueView">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="AverageRateValue" Type="Double" />
+          <Property Name="TotalRatesNumber" Type="Int32" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -50,6 +69,15 @@ warning 6013: The table/view 'YoutubeLinks.dbo.RateAverageValueView' does not ha
                 <ScalarProperty Name="Id" ColumnName="Id" />
                 <ScalarProperty Name="IP" ColumnName="IP" />
                 <ScalarProperty Name="Value" ColumnName="Value" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RateAverageValueViews">
+            <EntityTypeMapping TypeName="YoutubeLinksModel.RateAverageValueView">
+              <MappingFragment StoreEntitySet="RateAverageValueView">
+                <ScalarProperty Name="TotalRatesNumber" ColumnName="TotalRatesNumber" />
+                <ScalarProperty Name="AverageRateValue" ColumnName="AverageRateValue" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

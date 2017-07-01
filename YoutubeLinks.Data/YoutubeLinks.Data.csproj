@@ -64,6 +64,9 @@
     <Compile Include="Rate.cs">
       <DependentUpon>DatabaseModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="RateAverageValueView.cs">
+      <DependentUpon>DatabaseModel.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

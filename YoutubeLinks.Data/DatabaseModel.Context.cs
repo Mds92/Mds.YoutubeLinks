@@ -27,5 +27,6 @@ namespace YoutubeLinks.Data
         }
     
         public virtual DbSet<Rate> Rates { get; set; }
+        public virtual DbSet<RateAverageValueView> RateAverageValueViews { get; set; }
     }
 }

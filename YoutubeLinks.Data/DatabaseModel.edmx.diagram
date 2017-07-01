@@ -6,6 +6,7 @@
     <edmx:Diagrams>
       <Diagram DiagramId="9a4d8f8838ec4a7798f0ab80ae871789" Name="Diagram1" ZoomLevel="82">
         <EntityTypeShape EntityType="YoutubeLinksModel.Rate" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="YoutubeLinksModel.RateAverageValueView" Width="2.75" PointX="3.375" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

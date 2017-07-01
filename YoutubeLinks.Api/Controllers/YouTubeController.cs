@@ -5,6 +5,7 @@ using System.Web.Http;
 using YoutubeLinks.Api.Models;
 using YoutubeLinks.Api.Filters;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -303,11 +304,13 @@ namespace YoutubeLinks.Api.Controllers
         public async Task<YoutubeGetRateModel> GetRates()
         {
             var model = new YoutubeGetRateModel();
-#if DEBUG
-            Thread.Sleep(1000);
-            model.RateValue = 4.86f;
-            model.TotalRatesCount = 1213;
-#endif
+            using (var dbContext = new YoutubeLinksEntities())
+            {
+                var rateAverageValueViews = await dbContext.RateAverageValueViews.FirstOrDefaultAsync();
+                if (rateAverageValueViews == null) return model;
+                model.RateValue = rateAverageValueViews.AverageRateValue ?? 0;
+                model.TotalRatesCount = rateAverageValueViews.TotalRatesNumber ?? 0;
+            }
             return model;
         }
     }

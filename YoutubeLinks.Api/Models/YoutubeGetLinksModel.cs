@@ -29,7 +29,7 @@ namespace YoutubeLinks.Api.Models
 
     public class YoutubeGetRateModel
     {
-        public float RateValue { get; set; }
+        public double RateValue { get; set; }
         public int TotalRatesCount { get; set; }
     }
 
