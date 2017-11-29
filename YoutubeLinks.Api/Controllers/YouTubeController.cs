@@ -164,12 +164,16 @@ namespace YoutubeLinks.Api.Controllers
                 return proxy;
             }
         }
-        private static Task<VideoInfo> GetVideoInfo(string videoUrl)
+        private static Task<Video> GetVideoInfo(string videoUrl)
         {
             var youtubeClient = new YoutubeClient();
-            return youtubeClient.GetVideoInfoAsync(NormalizeId(videoUrl));
+            return youtubeClient.GetVideoAsync(NormalizeId(videoUrl));
         }
         private const string DomainName = "youtube.2tera.com";
+
+#if DEBUG
+
+#endif
 
         [HttpPost]
         public async Task<YoutubeVideoInfoModel> GetLinks(YoutubeGetLinksModel model)
@@ -177,14 +181,14 @@ namespace YoutubeLinks.Api.Controllers
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
 #if DEBUG
-            return GetDummyYoutubeVideoInfoModel();
+            //return GetDummyYoutubeVideoInfoModel();
 #endif
             var videoInfo = await GetVideoInfo(model.VideoUrl);
             var newImageHighResUrl = "";
-            if (!string.IsNullOrWhiteSpace(videoInfo.ImageHighResUrl))
+            if (!string.IsNullOrWhiteSpace(videoInfo.Thumbnails?.StandardResUrl))
             {
-                var thumbnailFilePath = GetAbsoluteFilePath($"{Guid.NewGuid()}{ZlpPathHelper.GetExtension(videoInfo.ImageHighResUrl)}");
-                Aria2Downloader.DownloadFile(videoInfo.ImageHighResUrl, thumbnailFilePath, GetProxy, 0, message => { Trace.Write(message); });
+                var thumbnailFilePath = GetAbsoluteFilePath($"{Guid.NewGuid()}{ZlpPathHelper.GetExtension(videoInfo.Thumbnails.StandardResUrl)}");
+                Aria2Downloader.DownloadFile(videoInfo.Thumbnails.StandardResUrl, thumbnailFilePath, GetProxy, 0, message => { Trace.Write(message); });
                 newImageHighResUrl = GetRelativeFilePath(ZlpPathHelper.GetFileNameFromFilePath(thumbnailFilePath));
             }
             var youtubeVideoInfoModel = new YoutubeVideoInfoModel
@@ -193,33 +197,33 @@ namespace YoutubeLinks.Api.Controllers
                 Title = videoInfo.Title,
                 VideoStreams = new List<YoutubeVideoStreamModel>(),
                 AudioStreams = new List<YoutubeAudioStreamModel>(),
-                AverageRating = Math.Round(videoInfo.AverageRating, 2),
+                AverageRating = Math.Round(videoInfo.Statistics.AverageRating, 2),
                 Description = videoInfo.Description,
-                DislikeCount = videoInfo.DislikeCount.ToString().ToMoneyFormat(),
+                DislikeCount = videoInfo.Statistics.DislikeCount.ToString().ToMoneyFormat(),
                 Duration = $"{videoInfo.Duration.Hours:00}:{videoInfo.Duration.Minutes:00}:{videoInfo.Duration.Seconds:00}",
                 ImageThumbnailUrl = newImageHighResUrl,
-                LikeCount = videoInfo.LikeCount.ToString().ToMoneyFormat(),
-                ViewCount = videoInfo.ViewCount.ToString().ToMoneyFormat()
+                LikeCount = videoInfo.Statistics.LikeCount.ToString().ToMoneyFormat(),
+                ViewCount = videoInfo.Statistics.ViewCount.ToString().ToMoneyFormat()
             };
             youtubeVideoInfoModel.VideoStreams.AddRange(
-                videoInfo.VideoStreams
+                videoInfo.VideoStreamInfos
                 .Where(q => q.Container == Container.Mp4)
                 .Select(q => new YoutubeVideoStreamModel
                 {
-                    Resolution = $"{q.VideoResolution.Width}×{q.VideoResolution.Height}",
+                    Resolution = $"{q.Resolution.Width}×{q.Resolution.Height}",
                     Bitrate = q.Bitrate,
                     VideoQuality = q.VideoQualityLabel,
                     Itag = q.Itag,
-                    Size = NormalizeFileSize(q.ContentLength)
+                    Size = NormalizeFileSize(q.Size)
                 }));
             youtubeVideoInfoModel.AudioStreams.AddRange(
-                videoInfo.AudioStreams
+                videoInfo.AudioStreamInfos
                     .Where(q => q.Container == Container.Mp4 || q.Container == Container.M4A)
                     .Select(q => new YoutubeAudioStreamModel
                     {
                         Bitrate = q.Bitrate,
                         Itag = q.Itag,
-                        Size = NormalizeFileSize(q.ContentLength)
+                        Size = NormalizeFileSize(q.Size)
                     }));
             return youtubeVideoInfoModel;
         }
@@ -229,9 +233,9 @@ namespace YoutubeLinks.Api.Controllers
         {
             if (!ModelState.IsValid)
                 throw new Exception("Data is invalid");
-#if DEBUG
-            return "/";
-#endif
+//#if DEBUG
+//            return "/";
+//#endif
             var videoInfo = await GetVideoInfo(model.VideoUrl);
             if (videoInfo == null)
                 throw new Exception("Selected video not found");
@@ -239,14 +243,14 @@ namespace YoutubeLinks.Api.Controllers
             var audioFilePath = "";
             if (model.IsAudio)
             {
-                audioStreamInfo = videoInfo.AudioStreams.FirstOrDefault(q => q.Itag == model.Itag);
+                audioStreamInfo = videoInfo.AudioStreamInfos.FirstOrDefault(q => q.Itag == model.Itag);
                 if (audioStreamInfo == null)
                     throw new Exception("Selected audio not found");
                 audioFilePath = GetAbsoluteFilePath($"{videoInfo.Title.RemoveIllegalCharsForUrl()}-{DomainName}.{audioStreamInfo.Container.ToString().ToLower()}");
                 Aria2Downloader.DownloadFile(audioStreamInfo.Url, audioFilePath, GetProxy, 0, message => { Trace.Write(message); });
                 return $"/DownloadTemp/{ZlpPathHelper.GetFileNameFromFilePath(audioFilePath)}";
             }
-            var videoStreamInfo = videoInfo.VideoStreams.FirstOrDefault(q => q.Itag == model.Itag);
+            var videoStreamInfo = videoInfo.VideoStreamInfos.FirstOrDefault(q => q.Itag == model.Itag);
             if (videoStreamInfo == null)
                 throw new Exception("Selected video not found");
             var videoFileName = $"{videoInfo.Title.RemoveIllegalCharsForUrl()}-{videoStreamInfo.VideoQualityLabel}-{DomainName}.{videoStreamInfo.Container.ToString().ToLower()}";
@@ -255,7 +259,7 @@ namespace YoutubeLinks.Api.Controllers
             var finalVideoFilePath = GetAbsoluteFilePath(videoFileName);
             if (ZlpIOHelper.FileExists(finalVideoFilePath)) return GetRelativeFilePath(ZlpPathHelper.GetFileNameFromFilePath(finalVideoFilePath));
             var tasks = new List<Task>();
-            audioStreamInfo = videoInfo.AudioStreams.OrderByDescending(q => q.Bitrate).FirstOrDefault(q => q.Container == Container.M4A || q.Container == Container.Mp4);
+            audioStreamInfo = videoInfo.AudioStreamInfos.OrderByDescending(q => q.Bitrate).FirstOrDefault(q => q.Container == Container.M4A || q.Container == Container.Mp4);
             tasks.Add(Task.Run(() =>
             {
                 Aria2Downloader.DownloadFile(videoStreamInfo.Url, videoTempFilePath, GetProxy, 0, message => { Trace.Write(message); });

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
@@ -13,8 +14,8 @@ namespace YoutubeLinks.Api.Filters
         {
             try
             {
-                var domainUri = actionContext.Request.Headers.Referrer;
-                if (!CachedParams.AllowdDomains.Contains(domainUri.Host))
+                var ipAddressString = ((HttpContextWrapper)actionContext.Request.Properties["MS_HttpContext"]).Request.UserHostName;
+                if (!CachedParams.AllowdDomains.Contains(ipAddressString))
                     actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Unauthorized);
                 base.OnAuthorization(actionContext);
             }

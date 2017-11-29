@@ -14,7 +14,9 @@ namespace YoutubeLinks.Api
                 _allowdDomains = new List<string>();
                 var allowedDomain1 = ConfigurationHelper.GetApplicationSettingValue<string>("AllowedDomain1");
                 var allowedDomain2 = ConfigurationHelper.GetApplicationSettingValue<string>("AllowedDomain2");
-                _allowdDomains.AddRange(new [] { allowedDomain1, allowedDomain2 });
+                var allowedDomain3 = ConfigurationHelper.GetApplicationSettingValue<string>("AllowedDomain3");
+                var allowedDomain4 = ConfigurationHelper.GetApplicationSettingValue<string>("AllowedDomain4");
+                _allowdDomains.AddRange(new [] { allowedDomain1, allowedDomain2, allowedDomain3, allowedDomain4 });
                 return _allowdDomains;
             }
         }
